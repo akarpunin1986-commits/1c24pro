@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/client";
 
 /* ── Types matching backend responses ─────────────────────────────────── */
@@ -238,12 +238,12 @@ export const DashboardPage: React.FC = () => {
       {/* ── Sidebar ────────────────────────────────── */}
       <aside className="fixed left-0 top-0 flex h-full w-64 flex-col border-r border-gray-200 bg-white">
         {/* Logo */}
-        <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-5">
+        <Link to="/" className="flex items-center gap-2 border-b border-gray-100 px-6 py-5 no-underline">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500 text-sm font-extrabold text-white">
             1С
           </div>
           <span className="text-lg font-bold text-gray-900">24.pro</span>
-        </div>
+        </Link>
 
         {/* Org info */}
         <div className="border-b border-gray-100 px-6 py-4">
