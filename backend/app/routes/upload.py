@@ -1,9 +1,11 @@
 """Chunked file upload routes for .dt / .bak databases."""
 
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, Request
 
+from app.config import settings
 from app.dependencies import get_current_user
 from app.models import User
 from app.schemas import (
@@ -12,6 +14,8 @@ from app.schemas import (
     UploadInitResponse,
     UploadStatusResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
@@ -35,11 +39,28 @@ async def init_upload(
 
     chunk_size = 5242880
     chunks_expected = math.ceil(body.size_bytes / chunk_size)
+    upload_id = uuid.uuid4()
+    db_name = f"test_{body.config_code}_1"
+
+    # Notify admin via SMS
+    try:
+        from app.services import sms as sms_service
+
+        admin_msg = (
+            f"1C24.PRO: загрузка базы!\n"
+            f"{body.filename}\n"
+            f"Конфиг: {body.config_code}\n"
+            f"Размер: {body.size_bytes // (1024 * 1024)} МБ"
+        )
+        await sms_service.send_sms(settings.ADMIN_PHONE, admin_msg)
+    except Exception:
+        logger.warning("Failed to send admin upload notification")
+
     return UploadInitResponse(
-        upload_id=uuid.uuid4(),
+        upload_id=upload_id,
         chunk_size=chunk_size,
         chunks_expected=chunks_expected,
-        db_name=f"test_{body.config_code}_1",
+        db_name=db_name,
     )
 
 

@@ -36,6 +36,7 @@ from app.schemas import (
     SendCodeResponse,
     TokenResponse,
 )
+from app.config import settings
 from app.services import dadata, otp, sms
 
 logger = logging.getLogger(__name__)
@@ -218,6 +219,14 @@ async def complete_registration(
     refresh_token = create_refresh_token(user.id)
 
     logger.info("New registration: %s, org=%s", phone, org.name_short)
+
+    # Notify admin via SMS
+    try:
+        admin_msg = f"1C24.PRO: новый клиент!\n{org.name_short}\nИНН: {org.inn}\nТел: {phone}"
+        await sms.send_sms(settings.ADMIN_PHONE, admin_msg)
+    except Exception:
+        logger.warning("Failed to send admin notification SMS")
+
     return CompleteRegistrationResponse(
         user_id=user.id,
         access_token=access_token,
