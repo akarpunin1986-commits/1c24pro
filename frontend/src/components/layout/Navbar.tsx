@@ -58,9 +58,9 @@ export const Navbar: React.FC<NavbarProps> = ({ user = null, onLogout }) => {
           <span className="text-lg font-bold text-dark">24.pro</span>
         </Link>
 
-        {/* Nav links */}
+        {/* Nav links — hide "Возможности" for authenticated users */}
         <div className="hidden items-center gap-8 md:flex">
-          {NAV_LINKS.map((link) => (
+          {NAV_LINKS.filter((link) => user ? link.href !== "#features" : true).map((link) => (
             <a
               key={link.href}
               href={link.href}
