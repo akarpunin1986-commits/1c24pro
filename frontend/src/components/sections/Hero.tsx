@@ -375,6 +375,50 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
     );
   }
 
+  /* ── Trial not started (registered, no uploads yet) ──────────── */
+  if (user.status === "trial_not_started") {
+    return (
+      <section className="relative bg-bg pb-16 pt-28">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
+          <div className="flex-1 space-y-4">
+            <span className="inline-block rounded-full bg-green-100 px-4 py-1.5 text-sm font-medium text-green-700">
+              30 дней бесплатно
+            </span>
+
+            <h1 className="text-3xl font-bold leading-snug text-dark">
+              {user.display_name ? `${user.display_name},` : ""}
+              {user.display_name ? <br /> : null}
+              с возвращением 👋
+            </h1>
+
+            <p className="text-base text-gray-500">
+              {user.org_name} &bull; ИНН {user.org_inn}
+            </p>
+
+            <p className="text-base text-gray-600">
+              <span className="font-semibold text-green-600">30 дней бесплатно</span> — начнутся после загрузки первой базы
+            </p>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Link to="/dashboard">
+                <Button variant="primary" size="lg">
+                  Загрузить базу
+                </Button>
+              </Link>
+              <a href="#pricing">
+                <Button variant="outline" size="lg">
+                  Как это работает
+                </Button>
+              </a>
+            </div>
+          </div>
+
+          <UploadInvitation user={user} />
+        </div>
+      </section>
+    );
+  }
+
   /* ── Trial active (days > 5) ─────────────────────────────────── */
   if (user.status === "trial") {
     return (

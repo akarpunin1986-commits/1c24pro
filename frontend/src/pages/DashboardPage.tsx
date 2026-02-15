@@ -194,7 +194,8 @@ export const DashboardPage: React.FC = () => {
   };
 
   /* ── Trial bar helpers ─────────────────────────── */
-  const trialDaysLeft = me
+  const trialNotStarted = me ? !me.trial_ends_at : false;
+  const trialDaysLeft = me && me.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(me.trial_ends_at).getTime() - Date.now()) / 86400000))
     : 0;
   const trialPercent = Math.max(0, Math.min(100, (trialDaysLeft / 30) * 100));
@@ -364,8 +365,30 @@ export const DashboardPage: React.FC = () => {
 
       {/* ── Main content ──────────────────────────── */}
       <main className="ml-64 flex-1 p-8">
-        {/* Trial banner */}
-        {trialDaysLeft > 0 && (
+        {/* Trial banner — not started */}
+        {trialNotStarted && (
+          <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                  30 дней бесплатно
+                </span>
+                <span className="text-sm text-gray-700">
+                  Тестовый период начнётся после загрузки первой базы
+                </span>
+              </div>
+              <button
+                onClick={() => setTab("upload")}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Загрузить базу &rarr;
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Trial banner — active */}
+        {!trialNotStarted && trialDaysLeft > 0 && (
           <div className={`mb-6 rounded-xl border p-4 ${
             trialDaysLeft <= 3
               ? "border-red-200 bg-red-50"
@@ -813,9 +836,11 @@ export const DashboardPage: React.FC = () => {
                   <div>
                     <label className="mb-1 block text-xs font-medium text-gray-500">Тестовый период</label>
                     <p className="text-sm text-gray-900">
-                      {trialDaysLeft > 0
-                        ? `Активен, осталось ${trialDaysLeft} ${pluralDays(trialDaysLeft)}`
-                        : "Завершён"}
+                      {trialNotStarted
+                        ? "Начнётся после загрузки первой базы (30 дней)"
+                        : trialDaysLeft > 0
+                          ? `Активен, осталось ${trialDaysLeft} ${pluralDays(trialDaysLeft)}`
+                          : "Завершён"}
                     </p>
                   </div>
                   <div>

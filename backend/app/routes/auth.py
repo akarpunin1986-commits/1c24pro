@@ -225,8 +225,7 @@ async def complete_registration(
     director_name = org_data.get("director_name", "") or ""
     last_name, first_name, patronymic = _parse_fio(director_name)
 
-    # Create User (owner)
-    now = datetime.now(timezone.utc)
+    # Create User (owner) — trial starts on first database upload, not now
     user = User(
         organization_id=org.id,
         phone=phone,
@@ -238,8 +237,8 @@ async def complete_registration(
         last_name=last_name,
         patronymic=patronymic,
         referral_code=_generate_referral_code(),
-        trial_started_at=now,
-        trial_ends_at=now + timedelta(days=30),
+        trial_started_at=None,
+        trial_ends_at=None,
     )
     db.add(user)
     await db.flush()
@@ -304,7 +303,11 @@ async def get_auth_me(
     trial_days_left = 0
     status = "active"
 
-    if user.trial_ends_at:
+    if user.trial_started_at is None:
+        # Registered but never uploaded a database — trial hasn't started
+        status = "trial_not_started"
+        trial_days_left = 30
+    elif user.trial_ends_at:
         trial_days_left = max(0, (user.trial_ends_at - now).days)
         if trial_days_left > 5:
             status = "trial"

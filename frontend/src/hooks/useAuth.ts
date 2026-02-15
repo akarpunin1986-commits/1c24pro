@@ -10,7 +10,7 @@ export interface UserStatus {
   user_id: string;
   phone: string;
   role: string;
-  status: "trial" | "trial_ending" | "expired" | "active";
+  status: "trial_not_started" | "trial" | "trial_ending" | "expired" | "active";
   trial_days_left: number;
   trial_ends_at: string | null;
   org_name: string;

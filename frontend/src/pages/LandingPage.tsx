@@ -50,6 +50,7 @@ export const LandingPage: React.FC = () => {
   }, [user]);
 
   const isGuest = !user;
+  const isTrialNotStarted = user?.status === "trial_not_started";
   const isTrial = user?.status === "trial" || user?.status === "trial_ending";
   const isExpired = user?.status === "expired";
   const isActive = user?.status === "active";
@@ -75,11 +76,14 @@ export const LandingPage: React.FC = () => {
         </>
       )}
 
-      {/* Trial: nudge to choose a tariff */}
-      {isTrial && (
+      {/* Trial / trial not started: nudge to choose a tariff */}
+      {(isTrial || isTrialNotStarted) && (
         <>
           <TrialCTA />
-          <Pricing title="Выберите тариф до окончания тестового периода" />
+          <Pricing title={isTrialNotStarted
+            ? "Тарифы — 30 дней бесплатно после загрузки базы"
+            : "Выберите тариф до окончания тестового периода"
+          } />
           <Calculator />
         </>
       )}

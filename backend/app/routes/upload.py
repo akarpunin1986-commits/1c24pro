@@ -2,11 +2,13 @@
 
 import logging
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_db
 from app.models import User
 from app.schemas import (
     MessageResponse,
@@ -24,23 +26,27 @@ router = APIRouter(prefix="/uploads", tags=["uploads"])
 async def init_upload(
     body: UploadInitRequest,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> UploadInitResponse:
     """Initialize a new chunked upload session.
 
-    Args:
-        body: Filename, size, and config code for the upload.
-        current_user: The authenticated user.
-
-    Returns:
-        Upload session details including upload_id and expected chunks.
+    Starts the 30-day trial on the user's first upload.
     """
-    # TODO: create Upload record in DB, generate db_name
     import math
 
     chunk_size = 5242880
     chunks_expected = math.ceil(body.size_bytes / chunk_size)
     upload_id = uuid.uuid4()
     db_name = f"test_{body.config_code}_1"
+
+    # Start trial on first database upload
+    if current_user.trial_started_at is None:
+        now = datetime.now(timezone.utc)
+        current_user.trial_started_at = now
+        current_user.trial_ends_at = now + timedelta(days=30)
+        db.add(current_user)
+        await db.flush()
+        logger.info("Trial started for user %s (first database uploaded)", current_user.phone)
 
     # Notify admin via SMS
     try:
