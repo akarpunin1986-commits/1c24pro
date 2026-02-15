@@ -1,13 +1,12 @@
 /**
- * LandingPage — main marketing page composing all landing sections.
- * Uses useAuth() to personalize Hero and Navbar for authenticated users.
- * Loads user databases for the Hero right-column panel.
+ * LandingPage — personalized marketing page.
+ * Shows different sections based on user authentication status and tariff.
  * @see TZ section 5.3 — Landing page sections
  */
 
 import { useState, useEffect } from "react";
-import { TopBar } from "@/components/layout/TopBar";
 import { Navbar } from "@/components/layout/Navbar";
+import { TopBar } from "@/components/layout/TopBar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
 import { BigNumbers } from "@/components/sections/BigNumbers";
@@ -16,6 +15,9 @@ import { Pricing } from "@/components/sections/Pricing";
 import { Calculator } from "@/components/sections/Calculator";
 import { FAQ } from "@/components/sections/FAQ";
 import { RegisterSection } from "@/components/sections/RegisterSection";
+import { TrialCTA } from "@/components/sections/TrialCTA";
+import { UpsellBlock } from "@/components/sections/UpsellBlock";
+import { PartnerBlock } from "@/components/sections/PartnerBlock";
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "@/api/client";
 
@@ -33,7 +35,7 @@ interface DbInfo {
   created_at: string;
 }
 
-/** Landing page — all marketing sections composed together */
+/** Landing page — sections vary by user state */
 export const LandingPage: React.FC = () => {
   const { user, loading, logout } = useAuth();
   const [databases, setDatabases] = useState<DbInfo[]>([]);
@@ -47,18 +49,63 @@ export const LandingPage: React.FC = () => {
     }
   }, [user]);
 
+  const isGuest = !user;
+  const isTrial = user?.status === "trial" || user?.status === "trial_ending";
+  const isExpired = user?.status === "expired";
+  const isActive = user?.status === "active";
+  const tariff = user?.tariff;
+
   return (
-    <div className="min-h-screen">
-      <TopBar />
+    <>
+      {/* TopBar — only for guests */}
+      {isGuest && <TopBar />}
+
       <Navbar user={user} onLogout={logout} />
+
       <Hero user={user} databases={databases} loading={loading} />
-      <BigNumbers />
-      <Features />
-      <Pricing />
-      <Calculator />
+
+      {/* Guest: full marketing landing */}
+      {isGuest && (
+        <>
+          <BigNumbers />
+          <Features />
+          <Pricing />
+          <Calculator />
+          <RegisterSection />
+        </>
+      )}
+
+      {/* Trial: nudge to choose a tariff */}
+      {isTrial && (
+        <>
+          <TrialCTA />
+          <Pricing title="Выберите тариф до окончания тестового периода" />
+          <Calculator />
+        </>
+      )}
+
+      {/* Expired: bring back to payment */}
+      {isExpired && (
+        <Pricing title="Выберите тариф, чтобы разморозить базы" />
+      )}
+
+      {/* Active on Start: upsell to Business */}
+      {isActive && tariff === "start" && (
+        <UpsellBlock currentTariff="start" />
+      )}
+
+      {/* Active on Business: upsell to Corporation */}
+      {isActive && tariff === "business" && (
+        <UpsellBlock currentTariff="business" />
+      )}
+
+      {/* Active on Corporation: partner program */}
+      {isActive && tariff === "corporation" && user.referral_code && (
+        <PartnerBlock referralCode={user.referral_code} />
+      )}
+
       <FAQ />
-      <RegisterSection />
       <Footer />
-    </div>
+    </>
   );
 };

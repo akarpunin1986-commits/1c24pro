@@ -19,6 +19,7 @@ export interface UserStatus {
   last_name: string | null;
   patronymic: string | null;
   display_name: string;
+  referral_code: string | null;
   tariff: string | null;
   tariff_active_until: string | null;
 }

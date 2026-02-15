@@ -403,6 +403,7 @@ class UserStatusResponse(BaseModel):
     last_name: str | None = None
     patronymic: str | None = None
     display_name: str
+    referral_code: str | None = None
     tariff: str | None = None
     tariff_active_until: str | None = None
 

@@ -378,22 +378,24 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
   /* ── Trial active (days > 5) ─────────────────────────────────── */
   if (user.status === "trial") {
     return (
-      <section className="relative min-h-screen bg-bg pt-32">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row">
-          <div className="flex-1 space-y-6">
+      <section className="relative bg-bg pb-16 pt-28">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
+          <div className="flex-1 space-y-4">
             <span className="inline-block rounded-full bg-blue-100 px-4 py-1.5 text-sm font-medium text-blue-700">
               Тестовый период
             </span>
 
-            <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-              Добро пожаловать{user.display_name ? `, ${user.display_name}` : ""}
+            <h1 className="text-3xl font-bold leading-snug text-dark">
+              {user.display_name ? `${user.display_name},` : ""}
+              {user.display_name ? <br /> : null}
+              с возвращением 👋
             </h1>
 
-            <p className="text-sm text-text-muted">
+            <p className="text-base text-gray-500">
               {user.org_name} &bull; ИНН {user.org_inn}
             </p>
 
-            <p className="text-lg text-text-muted">
+            <p className="text-base text-text-muted">
               Тестовый период — осталось{" "}
               <span className="font-semibold text-dark">
                 {user.trial_days_left} {pluralDays(user.trial_days_left)}
@@ -414,8 +416,6 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
                 </Button>
               </a>
             </div>
-
-            <TrustBadges />
           </div>
 
           <RightColumn user={user} databases={databases} />
@@ -427,24 +427,26 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
   /* ── Trial ending (days <= 5) ────────────────────────────────── */
   if (user.status === "trial_ending") {
     return (
-      <section className="relative min-h-screen bg-bg pt-32">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row">
-          <div className="flex-1 space-y-6">
+      <section className="relative bg-bg pb-16 pt-28">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
+          <div className="flex-1 space-y-4">
             <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
               <p className="text-sm font-medium text-orange-700">
                 &#x26A0;&#xFE0F; Осталось {user.trial_days_left} {pluralDays(user.trial_days_left)} тестового периода
               </p>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-              {user.display_name ? `${user.display_name}, ваш` : "Ваш"} тестовый период заканчивается
+            <h1 className="text-3xl font-bold leading-snug text-dark">
+              {user.display_name ? `${user.display_name},` : ""}
+              {user.display_name ? <br /> : null}
+              ваш тестовый период заканчивается
             </h1>
 
-            <p className="text-sm text-text-muted">
+            <p className="text-base text-gray-500">
               {user.org_name} &bull; ИНН {user.org_inn}
             </p>
 
-            <p className="text-lg text-orange-600">
+            <p className="text-base text-orange-600">
               Осталось {user.trial_days_left} {pluralDays(user.trial_days_left)} — выберите тариф, чтобы не потерять данные
             </p>
 
@@ -473,14 +475,20 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
   /* ── Expired ─────────────────────────────────────────────────── */
   if (user.status === "expired") {
     return (
-      <section className="relative min-h-screen bg-bg pt-32">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row">
-          <div className="flex-1 space-y-6">
-            <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-              Ваши базы <span className="text-red-500">заморожены</span>
+      <section className="relative bg-bg pb-16 pt-28">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
+          <div className="flex-1 space-y-4">
+            <h1 className="text-3xl font-bold leading-snug text-dark">
+              {user.display_name ? `${user.display_name},` : ""}
+              {user.display_name ? <br /> : null}
+              ваши базы <span className="text-red-500">заморожены</span>
             </h1>
 
-            <p className="max-w-lg text-lg text-text-muted">
+            <p className="text-base text-gray-500">
+              {user.org_name} &bull; ИНН {user.org_inn}
+            </p>
+
+            <p className="text-base text-text-muted">
               Оплатите тариф, чтобы продолжить работу.
               <br />
               Данные хранятся ещё 30 дней.
@@ -503,22 +511,24 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
 
   /* ── Active subscription ─────────────────────────────────────── */
   return (
-    <section className="relative min-h-screen bg-bg pt-32">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row">
-        <div className="flex-1 space-y-6">
+    <section className="relative bg-bg pb-16 pt-28">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
+        <div className="flex-1 space-y-4">
           <span className="inline-block rounded-full bg-green-100 px-4 py-1.5 text-sm font-medium text-green-700">
             Активная подписка
           </span>
 
-          <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-            Добро пожаловать{user.display_name ? `, ${user.display_name}` : ""}
+          <h1 className="text-3xl font-bold leading-snug text-dark">
+            {user.display_name ? `${user.display_name},` : ""}
+            {user.display_name ? <br /> : null}
+            с возвращением 👋
           </h1>
 
-          <p className="text-sm text-text-muted">
+          <p className="text-base text-gray-500">
             {user.org_name} &bull; ИНН {user.org_inn}
           </p>
 
-          <p className="text-lg text-text-muted">
+          <p className="text-base text-text-muted">
             Тариф {user.tariff ?? "Бизнес"}
             {user.tariff_active_until
               ? ` — активен до ${new Date(user.tariff_active_until).toLocaleDateString("ru-RU")}`
@@ -537,8 +547,6 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
               </Button>
             </Link>
           </div>
-
-          <TrustBadges />
         </div>
 
         <RightColumn user={user} databases={databases} />

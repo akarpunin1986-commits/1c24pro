@@ -338,6 +338,7 @@ async def get_auth_me(
         last_name=user.last_name,
         patronymic=user.patronymic,
         display_name=display_name,
+        referral_code=user.referral_code,
         tariff=None,
         tariff_active_until=None,
     )
