@@ -78,6 +78,7 @@ class User(Base):
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     first_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
     last_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    patronymic: Mapped[str | None] = mapped_column(String(150), nullable=True)
     is_owner: Mapped[bool] = mapped_column(Boolean, default=False)
     role: Mapped[str] = mapped_column(String(20), default="user")
     status: Mapped[str] = mapped_column(String(20), default="active")

@@ -47,12 +47,22 @@ async def get_me(
         status=org.status if org else "ACTIVE",
     )
 
+    # Build display_name: "Имя Отчество" or phone as fallback
+    if current_user.first_name:
+        display_name = current_user.first_name
+        if current_user.patronymic:
+            display_name += f" {current_user.patronymic}"
+    else:
+        display_name = current_user.phone
+
     return UserProfileResponse(
         id=current_user.id,
         phone=current_user.phone,
         email=current_user.email,
         first_name=current_user.first_name,
         last_name=current_user.last_name,
+        patronymic=current_user.patronymic,
+        display_name=display_name,
         role=current_user.role,
         status=current_user.status,
         referral_code=current_user.referral_code,
@@ -78,6 +88,8 @@ async def update_me(
         current_user.first_name = body.first_name
     if body.last_name is not None:
         current_user.last_name = body.last_name
+    if body.patronymic is not None:
+        current_user.patronymic = body.patronymic
 
     db.add(current_user)
     return MessageResponse(message="Profile updated successfully")

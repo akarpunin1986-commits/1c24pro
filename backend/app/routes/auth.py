@@ -51,6 +51,15 @@ def _generate_referral_code() -> str:
     return "".join(secrets.choice(alphabet) for _ in range(8))
 
 
+def _parse_fio(full_name: str) -> tuple[str, str, str]:
+    """Parse 'Фамилия Имя Отчество' into (last_name, first_name, patronymic)."""
+    parts = full_name.strip().split()
+    last_name = parts[0] if len(parts) >= 1 else ""
+    first_name = parts[1] if len(parts) >= 2 else ""
+    patronymic = parts[2] if len(parts) >= 3 else ""
+    return last_name, first_name, patronymic
+
+
 def _make_org_slug(name_short: str) -> str:
     """Transliterate org name to a slug for db_name generation."""
     translit_map = {
@@ -212,6 +221,10 @@ async def complete_registration(
     db.add(org)
     await db.flush()
 
+    # Parse director name into FIO
+    director_name = org_data.get("director_name", "") or ""
+    last_name, first_name, patronymic = _parse_fio(director_name)
+
     # Create User (owner)
     now = datetime.now(timezone.utc)
     user = User(
@@ -221,6 +234,9 @@ async def complete_registration(
         is_owner=True,
         role="owner",
         status="active",
+        first_name=first_name,
+        last_name=last_name,
+        patronymic=patronymic,
         referral_code=_generate_referral_code(),
         trial_started_at=now,
         trial_ends_at=now + timedelta(days=30),
@@ -299,6 +315,14 @@ async def get_auth_me(
 
     # TODO: Check if user has active paid subscription — override status to "active"
 
+    # Build display_name: "Имя Отчество" or phone as fallback
+    if user.first_name:
+        display_name = user.first_name
+        if user.patronymic:
+            display_name += f" {user.patronymic}"
+    else:
+        display_name = user.phone
+
     return UserStatusResponse(
         user_id=str(user.id),
         phone=user.phone,
@@ -308,6 +332,10 @@ async def get_auth_me(
         trial_ends_at=user.trial_ends_at.isoformat() if user.trial_ends_at else None,
         org_name=org.name_short if org else "",
         org_inn=org.inn if org else "",
+        first_name=user.first_name,
+        last_name=user.last_name,
+        patronymic=user.patronymic,
+        display_name=display_name,
         tariff=None,
         tariff_active_until=None,
     )

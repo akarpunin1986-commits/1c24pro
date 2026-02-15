@@ -15,6 +15,10 @@ export interface UserStatus {
   trial_ends_at: string | null;
   org_name: string;
   org_inn: string;
+  first_name: string | null;
+  last_name: string | null;
+  patronymic: string | null;
+  display_name: string;
   tariff: string | null;
   tariff_active_until: string | null;
 }

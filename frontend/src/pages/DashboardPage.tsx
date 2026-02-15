@@ -27,6 +27,8 @@ interface MeData {
   email: string | null;
   first_name: string | null;
   last_name: string | null;
+  patronymic: string | null;
+  display_name: string;
   role: string;
   status: string;
   referral_code: string;
@@ -94,6 +96,29 @@ export const DashboardPage: React.FC = () => {
   // Referral copy
   const [copied, setCopied] = useState(false);
 
+  // Employees / Invite
+  interface MemberInfo {
+    id: string;
+    phone: string;
+    email: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    patronymic: string | null;
+    display_name: string;
+    role: string;
+    status: string;
+    created_at: string;
+  }
+  const [members, setMembers] = useState<MemberInfo[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [invFirstName, setInvFirstName] = useState("");
+  const [invLastName, setInvLastName] = useState("");
+  const [invPatronymic, setInvPatronymic] = useState("");
+  const [invPhone, setInvPhone] = useState("");
+  const [inviting, setInviting] = useState(false);
+  const [inviteMsg, setInviteMsg] = useState("");
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -115,6 +140,52 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  const loadMembers = useCallback(async () => {
+    setMembersLoading(true);
+    try {
+      const res = await apiClient.get<MemberInfo[]>("/org/members");
+      setMembers(res.data);
+    } catch {
+      setMembers([]);
+    } finally {
+      setMembersLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab === "employees") {
+      void loadMembers();
+    }
+  }, [tab, loadMembers]);
+
+  const handleInvite = async (): Promise<void> => {
+    if (!invFirstName.trim() || !invPhone.trim()) return;
+    setInviting(true);
+    setInviteMsg("");
+    try {
+      const phone = invPhone.replace(/\D/g, "");
+      const formatted = phone.startsWith("7") ? `+${phone}` : phone.startsWith("8") ? `+7${phone.slice(1)}` : `+7${phone}`;
+      await apiClient.post("/org/invite", {
+        first_name: invFirstName.trim(),
+        last_name: invLastName.trim() || null,
+        patronymic: invPatronymic.trim() || null,
+        phone: formatted,
+      });
+      setInviteMsg("Приглашение отправлено!");
+      setInvFirstName("");
+      setInvLastName("");
+      setInvPatronymic("");
+      setInvPhone("");
+      setShowInviteForm(false);
+      void loadMembers();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Ошибка отправки приглашения";
+      setInviteMsg(msg);
+    } finally {
+      setInviting(false);
+    }
+  };
 
   const handleLogout = (): void => {
     localStorage.removeItem("access_token");
@@ -273,13 +344,13 @@ export const DashboardPage: React.FC = () => {
         <div className="border-t border-gray-100 px-4 py-4">
           <div className="mb-3 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600">
-              {me.phone.slice(-2)}
+              {me.first_name ? me.first_name[0] : me.phone.slice(-2)}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-gray-900">
-                {formatPhoneDisplay(me.phone)}
+                {me.display_name || formatPhoneDisplay(me.phone)}
               </p>
-              <p className="text-xs text-gray-400 capitalize">{me.role}</p>
+              <p className="text-xs text-gray-400">{formatPhoneDisplay(me.phone)}</p>
             </div>
           </div>
           <button
@@ -512,27 +583,134 @@ export const DashboardPage: React.FC = () => {
           <section>
             <div className="mb-6 flex items-center justify-between">
               <h1 className="text-2xl font-bold text-gray-900">Сотрудники</h1>
-              <button className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-orange-600">
-                + Пригласить
-              </button>
+              {me.role === "owner" && (
+                <button
+                  onClick={() => { setShowInviteForm((v) => !v); setInviteMsg(""); }}
+                  className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-orange-600"
+                >
+                  {showInviteForm ? "Отмена" : "+ Пригласить"}
+                </button>
+              )}
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="flex items-center gap-4 border-b border-gray-100 px-6 py-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600">
-                  {me.phone.slice(-2)}
+            {/* Invite form */}
+            {showInviteForm && (
+              <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 p-6">
+                <h3 className="mb-4 text-sm font-semibold text-gray-900">Пригласить сотрудника</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Фамилия</label>
+                    <input
+                      type="text"
+                      value={invLastName}
+                      onChange={(e) => setInvLastName(e.target.value)}
+                      placeholder="Иванова"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">
+                      Имя <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={invFirstName}
+                      onChange={(e) => setInvFirstName(e.target.value)}
+                      placeholder="Мария"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Отчество</label>
+                    <input
+                      type="text"
+                      value={invPatronymic}
+                      onChange={(e) => setInvPatronymic(e.target.value)}
+                      placeholder="Сергеевна"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">
+                      Телефон <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={invPhone}
+                      onChange={(e) => setInvPhone(e.target.value)}
+                      placeholder="+7 (927) 123-45-67"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">
-                    {formatPhoneDisplay(me.phone)}
-                  </p>
-                  <p className="text-sm text-gray-400">{me.email || "Email не указан"}</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <button
+                    onClick={() => void handleInvite()}
+                    disabled={inviting || !invFirstName.trim() || !invPhone.trim()}
+                    className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {inviting ? "Отправка..." : "Отправить приглашение"}
+                  </button>
+                  {inviteMsg && (
+                    <p className={`text-sm ${inviteMsg.startsWith("Приглашение") ? "text-green-600" : "text-red-600"}`}>
+                      {inviteMsg}
+                    </p>
+                  )}
                 </div>
-                <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700 capitalize">
-                  {me.role === "owner" ? "Владелец" : me.role}
-                </span>
               </div>
-            </div>
+            )}
+
+            {/* Invite success message outside form */}
+            {!showInviteForm && inviteMsg && inviteMsg.startsWith("Приглашение") && (
+              <div className="mb-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700">
+                {inviteMsg}
+              </div>
+            )}
+
+            {/* Members list */}
+            {membersLoading ? (
+              <div className="py-8 text-center text-gray-400">Загрузка...</div>
+            ) : (
+              <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                {members.length === 0 ? (
+                  <div className="px-6 py-8 text-center text-gray-400">Нет сотрудников</div>
+                ) : (
+                  members.map((m, idx) => (
+                    <div
+                      key={m.id}
+                      className={`flex items-center gap-4 px-6 py-4 ${idx < members.length - 1 ? "border-b border-gray-100" : ""}`}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600">
+                        {m.first_name ? m.first_name[0] : m.phone.slice(-2)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-gray-900">
+                          {m.display_name}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {formatPhoneDisplay(m.phone)}
+                          {m.email ? ` • ${m.email}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {m.status === "invited" && (
+                          <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
+                            Приглашён
+                          </span>
+                        )}
+                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          m.role === "owner"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {m.role === "owner" ? "Владелец" : "Сотрудник"}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
 
             <p className="mt-4 text-sm text-gray-400">
               Приглашайте сотрудников по номеру телефона. Они получат SMS со ссылкой для входа.

@@ -152,6 +152,8 @@ class UserProfileResponse(BaseModel):
     email: str | None = None
     first_name: str | None = None
     last_name: str | None = None
+    patronymic: str | None = None
+    display_name: str
     role: str
     status: str
     referral_code: str
@@ -166,6 +168,7 @@ class UpdateProfileRequest(BaseModel):
     email: str | None = None
     first_name: str | None = None
     last_name: str | None = None
+    patronymic: str | None = None
 
 
 class DatabaseResponse(BaseModel):
@@ -193,6 +196,9 @@ class InviteRequest(BaseModel):
     """Request to invite a user to the organization."""
 
     phone: str = Field(..., pattern=r"^\+7\d{10}$", examples=["+79991234567"])
+    first_name: str = Field(..., min_length=1, max_length=100, examples=["Мария"])
+    last_name: str | None = Field(None, max_length=100, examples=["Иванова"])
+    patronymic: str | None = Field(None, max_length=100, examples=["Сергеевна"])
 
 
 class InviteResponse(BaseModel):
@@ -217,6 +223,8 @@ class MemberResponse(BaseModel):
     email: str | None = None
     first_name: str | None = None
     last_name: str | None = None
+    patronymic: str | None = None
+    display_name: str
     role: str
     status: str
     created_at: datetime
@@ -391,6 +399,10 @@ class UserStatusResponse(BaseModel):
     trial_ends_at: str | None = None
     org_name: str
     org_inn: str
+    first_name: str | None = None
+    last_name: str | None = None
+    patronymic: str | None = None
+    display_name: str
     tariff: str | None = None
     tariff_active_until: str | None = None
 

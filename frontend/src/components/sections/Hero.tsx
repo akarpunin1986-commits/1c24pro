@@ -200,8 +200,12 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             </span>
 
             <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-              Добро пожаловать, {user.org_name}
+              Добро пожаловать, {user.display_name}
             </h1>
+
+            <p className="text-sm text-text-muted">
+              {user.org_name} &bull; ИНН {user.org_inn}
+            </p>
 
             <p className="text-lg text-text-muted">
               Тестовый период — осталось{" "}
@@ -248,8 +252,12 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             </div>
 
             <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-              {user.org_name}, ваш тестовый период заканчивается
+              {user.display_name}, ваш тестовый период заканчивается
             </h1>
+
+            <p className="text-sm text-text-muted">
+              {user.org_name} &bull; ИНН {user.org_inn}
+            </p>
 
             <p className="text-lg text-orange-600">
               Осталось {user.trial_days_left} {pluralDays(user.trial_days_left)} — выберите тариф, чтобы не потерять данные
@@ -318,8 +326,12 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
           </span>
 
           <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-            Добро пожаловать, {user.org_name}
+            Добро пожаловать, {user.display_name}
           </h1>
+
+          <p className="text-sm text-text-muted">
+            {user.org_name} &bull; ИНН {user.org_inn}
+          </p>
 
           <p className="text-lg text-text-muted">
             Тариф {user.tariff ?? "Бизнес"}
