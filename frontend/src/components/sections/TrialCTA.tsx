@@ -7,10 +7,10 @@ export const TrialCTA: React.FC = () => (
   <section className="bg-gradient-to-b from-orange-50 to-white py-16">
     <div className="mx-auto max-w-4xl px-6 text-center">
       <h2 className="mb-3 text-2xl font-bold text-gray-900">
-        Вам подходит тариф...
+        Выберите тариф после тестового периода
       </h2>
       <p className="mb-8 text-gray-500">
-        Ответьте на 2 вопроса и мы подберём оптимальный тариф
+        Все тарифы включают бесплатный перенос баз, ежедневные бэкапы и техподдержку
       </p>
 
       <div className="grid gap-6 md:grid-cols-3">
