@@ -1,6 +1,7 @@
 /**
  * Hero — personalized landing hero section.
  * Shows different content for guests, trial users, expiring users, expired users, and active subscribers.
+ * Right column: animated mockup (guest), real databases (auth+has dbs), or upload CTA (auth+no dbs).
  * @see TZ section 5.3 — Hero description
  */
 
@@ -8,25 +9,60 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import type { UserStatus } from "@/hooks/useAuth";
 
+/* ── Types ───────────────────────────────────────────────────────────── */
+
+interface DbInfo {
+  id: string;
+  name: string;
+  db_name: string;
+  config_code: string;
+  config_name: string;
+  status: string;
+  web_url: string | null;
+  rdp_url: string | null;
+  size_gb: number | null;
+  last_backup_at: string | null;
+  created_at: string;
+}
+
 interface HeroProps {
   user?: UserStatus | null;
+  databases?: DbInfo[];
   loading?: boolean;
 }
 
-/* ── Dashboard mockup (shared right column) ─────────────────────────── */
+/* ── Status mapping ──────────────────────────────────────────────────── */
 
-const DashboardMockup: React.FC<{ frozen?: boolean }> = ({ frozen = false }) => (
+const DB_STATUS: Record<string, { label: string; dotColor: string; textColor: string }> = {
+  active: { label: "Работает", dotColor: "bg-green-500", textColor: "text-green-600" },
+  preparing: { label: "Подготовка", dotColor: "bg-yellow-500", textColor: "text-yellow-600" },
+  readonly: { label: "Только чтение", dotColor: "bg-orange-500", textColor: "text-orange-600" },
+  blocked: { label: "Заблокирована", dotColor: "bg-red-500", textColor: "text-red-600" },
+};
+
+const DB_ICONS: Record<string, { icon: string; color: string }> = {
+  bp30: { icon: "📗", color: "bg-green-100" },
+  zup31: { icon: "📘", color: "bg-blue-100" },
+  ut11: { icon: "📙", color: "bg-amber-100" },
+  erp25: { icon: "📕", color: "bg-red-100" },
+  unf18: { icon: "📒", color: "bg-lime-100" },
+  ka2: { icon: "📓", color: "bg-purple-100" },
+  dt: { icon: "📋", color: "bg-cyan-100" },
+  med: { icon: "🏥", color: "bg-pink-100" },
+  other: { icon: "📦", color: "bg-gray-100" },
+};
+
+/* ── Guest: Animated dashboard mockup ────────────────────────────────── */
+
+const MOCK_DBS = [
+  { name: "Бухгалтерия 3.0", slug: "rassvet_bp30_1", size: "2.4", color: "bg-green-100", icon: "📗" },
+  { name: "ЗУП 3.1", slug: "rassvet_zup31_1", size: "1.8", color: "bg-blue-100", icon: "📘" },
+  { name: "Управление торговлей 11", slug: "rassvet_ut11_1", size: "5.1", color: "bg-amber-100", icon: "📙" },
+];
+
+const GuestMockup: React.FC = () => (
   <div className="flex flex-1 items-center justify-center">
-    <div className={`relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl ${frozen ? "opacity-60" : ""}`}>
-      {/* Frozen overlay */}
-      {frozen && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[2px]">
-          <span className="rounded-xl bg-red-100 px-6 py-3 text-lg font-bold text-red-600">
-            Заморожено
-          </span>
-        </div>
-      )}
-
+    <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -38,25 +74,25 @@ const DashboardMockup: React.FC<{ frozen?: boolean }> = ({ frozen = false }) => 
         </span>
       </div>
 
-      {/* Database cards */}
+      {/* Animated database cards */}
       <div className="space-y-3">
-        {[
-          { name: "Бухгалтерия 3.0", slug: "rassvet_bp30_1", size: "2.4", color: "bg-green-100", icon: "📗" },
-          { name: "ЗУП 3.1", slug: "rassvet_zup31_1", size: "1.8", color: "bg-blue-100", icon: "📘" },
-          { name: "Управление торговлей 11", slug: "rassvet_ut11_1", size: "5.1", color: "bg-amber-100", icon: "📙" },
-        ].map((db) => (
-          <div key={db.slug} className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4">
+        {MOCK_DBS.map((db, idx) => (
+          <div
+            key={db.slug}
+            className="flex animate-fadeInUp items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 opacity-0"
+            style={{ animationDelay: `${idx * 200}ms` }}
+          >
             <div className="flex items-center gap-3">
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${db.color} text-lg`}>
                 {db.icon}
               </div>
               <div>
                 <p className="font-medium text-dark">{db.name}</p>
-                <p className="text-xs text-text-muted">{db.slug} • {db.size} ГБ</p>
+                <p className="text-xs text-text-muted">{db.slug} &bull; {db.size} ГБ</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
               <span className="text-sm text-green-600">Работает</span>
             </div>
           </div>
@@ -82,7 +118,148 @@ const DashboardMockup: React.FC<{ frozen?: boolean }> = ({ frozen = false }) => 
   </div>
 );
 
-/* ── Trust badges (for guest variant) ───────────────────────────────── */
+/* ── Auth: Frozen mockup ─────────────────────────────────────────────── */
+
+const FrozenMockup: React.FC = () => (
+  <div className="flex flex-1 items-center justify-center">
+    <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 opacity-60 shadow-xl">
+      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[2px]">
+        <span className="rounded-xl bg-red-100 px-6 py-3 text-lg font-bold text-red-600">
+          Заморожено
+        </span>
+      </div>
+      {/* Simplified frozen card content */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold text-dark">Ваши базы</h3>
+        <p className="text-sm text-text-muted">Тестовый период истёк</p>
+      </div>
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-16 rounded-xl border border-gray-100 bg-gray-50" />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+/* ── Auth: Real databases panel ──────────────────────────────────────── */
+
+const RealDashboard: React.FC<{ user: UserStatus; databases: DbInfo[] }> = ({ user, databases }) => {
+  const allActive = databases.every((d) => d.status === "active");
+
+  return (
+    <div className="flex flex-1 items-center justify-center">
+      <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl">
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-dark">{user.org_name}</h3>
+            <p className="text-sm text-text-muted">
+              {user.status === "active"
+                ? `Тариф: ${user.tariff ?? "Бизнес"}`
+                : `Тестовый период | Осталось ${user.trial_days_left} ${pluralDays(user.trial_days_left)}`}
+            </p>
+          </div>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              allActive
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+            }`}
+          >
+            {allActive ? "Всё работает" : "Ожидает загрузки"}
+          </span>
+        </div>
+
+        {/* Real database cards */}
+        <div className="space-y-3">
+          {databases.map((db, idx) => {
+            const st = DB_STATUS[db.status] ?? DB_STATUS.preparing;
+            const ic = DB_ICONS[db.config_code] ?? DB_ICONS.other;
+            return (
+              <div
+                key={db.id}
+                className="flex animate-fadeInUp items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 opacity-0"
+                style={{ animationDelay: `${idx * 150}ms` }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${ic.color} text-lg`}>
+                    {ic.icon}
+                  </div>
+                  <div>
+                    <p className="font-medium text-dark">{db.config_name || db.name}</p>
+                    <p className="text-xs text-text-muted">
+                      {db.db_name} {db.size_gb ? `\u2022 ${db.size_gb} ГБ` : ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${st.dotColor} ${db.status === "active" ? "animate-pulse" : ""}`} />
+                  <span className={`text-sm ${st.textColor}`}>{st.label}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom stats */}
+        <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-dark">{databases.length}</p>
+            <p className="text-xs text-text-muted">{databases.length === 1 ? "База" : "Базы"}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-dark">&mdash;</p>
+            <p className="text-xs text-text-muted">Пользователей</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-green-600">99.9%</p>
+            <p className="text-xs text-text-muted">Uptime</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── Auth: Empty state — upload invitation ───────────────────────────── */
+
+const UploadInvitation: React.FC<{ user: UserStatus }> = ({ user }) => (
+  <div className="flex flex-1 items-center justify-center">
+    <Link
+      to="/dashboard"
+      className="group w-full max-w-lg no-underline"
+    >
+      <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-white p-6 shadow-xl transition-all duration-200 hover:border-primary hover:bg-orange-50">
+        {/* Header */}
+        <div className="mb-6">
+          <h3 className="text-lg font-bold text-dark">{user.org_name}</h3>
+          <p className="text-sm text-text-muted">
+            Тестовый период | Осталось {user.trial_days_left} {pluralDays(user.trial_days_left)}
+          </p>
+        </div>
+
+        {/* Upload CTA */}
+        <div className="flex flex-col items-center py-8 text-center">
+          <div className="mb-4 text-5xl">📂</div>
+          <p className="text-lg font-semibold text-gray-900">
+            Загрузите свою первую базу 1С
+          </p>
+          <p className="mt-2 text-sm text-gray-500">
+            Поддерживаем .dt и .bak файлы любого размера
+          </p>
+          <div className="mt-6">
+            <span className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-colors group-hover:bg-primary-hover">
+              Загрузить базу
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  </div>
+);
+
+/* ── Trust badges ────────────────────────────────────────────────────── */
 
 const TrustBadges: React.FC = () => (
   <div className="flex flex-wrap items-center gap-6 pt-4 text-base text-gray-500">
@@ -116,7 +293,7 @@ const TrustBadges: React.FC = () => (
   </div>
 );
 
-/* ── Trial progress bar ─────────────────────────────────────────────── */
+/* ── Trial progress bar ──────────────────────────────────────────────── */
 
 const TrialProgressBar: React.FC<{ daysLeft: number; color?: string }> = ({
   daysLeft,
@@ -130,7 +307,7 @@ const TrialProgressBar: React.FC<{ daysLeft: number; color?: string }> = ({
   );
 };
 
-/* ── Plural helper ──────────────────────────────────────────────────── */
+/* ── Plural helper ───────────────────────────────────────────────────── */
 
 function pluralDays(n: number): string {
   const m10 = n % 10;
@@ -140,16 +317,25 @@ function pluralDays(n: number): string {
   return "дней";
 }
 
-/* ── Main Hero component ────────────────────────────────────────────── */
+/* ── Right-column selector ───────────────────────────────────────────── */
 
-/** Landing page hero section — personalized for auth users */
-export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
-  // While loading or guest — show default hero
+function RightColumn({ user, databases }: { user: UserStatus | null; databases: DbInfo[] }): React.ReactElement {
+  if (!user) return <GuestMockup />;
+  if (user.status === "expired") return <FrozenMockup />;
+  if (databases.length > 0) return <RealDashboard user={user} databases={databases} />;
+  return <UploadInvitation user={user} />;
+}
+
+/* ══════════════════════════════════════════════════════════════════════ */
+/*  Main Hero component                                                  */
+/* ══════════════════════════════════════════════════════════════════════ */
+
+export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading = false }) => {
+  /* ── Guest / loading ─────────────────────────────────────────── */
   if (loading || !user) {
     return (
       <section className="relative min-h-screen bg-bg pt-32">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row">
-          {/* Guest left content */}
           <div className="flex-1 space-y-6">
             <span className="inline-block rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-700">
               Облачная 1С нового поколения
@@ -183,13 +369,13 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             <TrustBadges />
           </div>
 
-          <DashboardMockup />
+          <GuestMockup />
         </div>
       </section>
     );
   }
 
-  /* ── Variant 2: Trial active (days > 5) ────────────────────── */
+  /* ── Trial active (days > 5) ─────────────────────────────────── */
   if (user.status === "trial") {
     return (
       <section className="relative min-h-screen bg-bg pt-32">
@@ -232,19 +418,18 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             <TrustBadges />
           </div>
 
-          <DashboardMockup />
+          <RightColumn user={user} databases={databases} />
         </div>
       </section>
     );
   }
 
-  /* ── Variant 3: Trial ending (days <= 5) ───────────────────── */
+  /* ── Trial ending (days <= 5) ────────────────────────────────── */
   if (user.status === "trial_ending") {
     return (
       <section className="relative min-h-screen bg-bg pt-32">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row">
           <div className="flex-1 space-y-6">
-            {/* Warning banner */}
             <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
               <p className="text-sm font-medium text-orange-700">
                 &#x26A0;&#xFE0F; Осталось {user.trial_days_left} {pluralDays(user.trial_days_left)} тестового периода
@@ -279,13 +464,13 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             </div>
           </div>
 
-          <DashboardMockup />
+          <RightColumn user={user} databases={databases} />
         </div>
       </section>
     );
   }
 
-  /* ── Variant 4: Expired ────────────────────────────────────── */
+  /* ── Expired ─────────────────────────────────────────────────── */
   if (user.status === "expired") {
     return (
       <section className="relative min-h-screen bg-bg pt-32">
@@ -310,13 +495,13 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             </div>
           </div>
 
-          <DashboardMockup frozen />
+          <FrozenMockup />
         </div>
       </section>
     );
   }
 
-  /* ── Variant 5: Active subscription ────────────────────────── */
+  /* ── Active subscription ─────────────────────────────────────── */
   return (
     <section className="relative min-h-screen bg-bg pt-32">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row">
@@ -356,7 +541,7 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
           <TrustBadges />
         </div>
 
-        <DashboardMockup />
+        <RightColumn user={user} databases={databases} />
       </div>
     </section>
   );
