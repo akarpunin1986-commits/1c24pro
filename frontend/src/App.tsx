@@ -3,6 +3,7 @@ import { LandingPage } from "@/pages/LandingPage";
 import { AuthPage } from "@/pages/AuthPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { AdminPage } from "@/pages/AdminPage";
+import { PrivateRoute } from "@/components/PrivateRoute";
 
 /**
  * Main application component.
@@ -13,8 +14,22 @@ export const App: React.FC<Record<string, never>> = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/auth" element={<AuthPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/admin" element={<AdminPage />} />
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            <DashboardPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute>
+            <AdminPage />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 };
