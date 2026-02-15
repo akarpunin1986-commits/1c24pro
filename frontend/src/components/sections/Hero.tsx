@@ -62,7 +62,7 @@ const MOCK_DBS = [
 
 const GuestMockup: React.FC = () => (
   <div className="flex flex-1 items-center justify-center">
-    <div className="relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl">
+    <div className="group relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-2xl">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -79,7 +79,7 @@ const GuestMockup: React.FC = () => (
         {MOCK_DBS.map((db, idx) => (
           <div
             key={db.slug}
-            className="flex animate-fadeInUp items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 opacity-0"
+            className="flex animate-fadeInUp items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 opacity-0 transition-all duration-200 hover:translate-x-1 hover:bg-gray-100"
             style={{ animationDelay: `${idx * 200}ms` }}
           >
             <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ const GuestMockup: React.FC = () => (
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500 group-hover:animate-softPing" />
               <span className="text-sm text-green-600">Работает</span>
             </div>
           </div>
@@ -102,15 +102,15 @@ const GuestMockup: React.FC = () => (
       {/* Bottom stats */}
       <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
         <div className="text-center">
-          <p className="text-2xl font-bold text-dark">3</p>
+          <p className="text-2xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">3</p>
           <p className="text-xs text-text-muted">Базы</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-dark">5</p>
+          <p className="text-2xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">5</p>
           <p className="text-xs text-text-muted">Пользователей</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-green-600">99.9%</p>
+          <p className="text-2xl font-bold text-green-600 transition-transform duration-300 group-hover:scale-110">99.9%</p>
           <p className="text-xs text-text-muted">Uptime</p>
         </div>
       </div>
