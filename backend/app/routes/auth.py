@@ -35,6 +35,7 @@ from app.schemas import (
     RefreshTokenRequest,
     SendCodeResponse,
     TokenResponse,
+    UserStatusResponse,
 )
 from app.config import settings
 from app.services import dadata, otp, sms
@@ -244,6 +245,71 @@ async def complete_registration(
         user_id=user.id,
         access_token=access_token,
         refresh_token=refresh_token,
+    )
+
+
+@router.get("/me", response_model=UserStatusResponse)
+async def get_auth_me(
+    authorization: str = Header(..., alias="Authorization"),
+    db: AsyncSession = Depends(get_db),
+) -> UserStatusResponse:
+    """Get current user status for personalized UI (landing hero)."""
+    if not authorization.startswith("Bearer "):
+        raise UnauthorizedError("Invalid authorization header")
+    token = authorization.removeprefix("Bearer ")
+    try:
+        payload = decode_token(token)
+    except JWTError:
+        raise UnauthorizedError("Invalid or expired token")
+    if payload.get("type") != "access":
+        raise UnauthorizedError("Invalid token type")
+
+    import uuid as _uuid
+
+    user_id_str = str(payload.get("sub", ""))
+    try:
+        user_id = _uuid.UUID(user_id_str)
+    except ValueError:
+        raise UnauthorizedError("Invalid token payload")
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise UnauthorizedError("User not found")
+
+    # Get organization
+    result = await db.execute(
+        select(Organization).where(Organization.id == user.organization_id)
+    )
+    org = result.scalar_one_or_none()
+
+    # Calculate trial status
+    now = datetime.now(timezone.utc)
+    trial_days_left = 0
+    status = "active"
+
+    if user.trial_ends_at:
+        trial_days_left = max(0, (user.trial_ends_at - now).days)
+        if trial_days_left > 5:
+            status = "trial"
+        elif trial_days_left > 0:
+            status = "trial_ending"
+        else:
+            status = "expired"
+
+    # TODO: Check if user has active paid subscription — override status to "active"
+
+    return UserStatusResponse(
+        user_id=str(user.id),
+        phone=user.phone,
+        role=user.role,
+        status=status,
+        trial_days_left=trial_days_left,
+        trial_ends_at=user.trial_ends_at.isoformat() if user.trial_ends_at else None,
+        org_name=org.name_short if org else "",
+        org_inn=org.inn if org else "",
+        tariff=None,
+        tariff_active_until=None,
     )
 
 

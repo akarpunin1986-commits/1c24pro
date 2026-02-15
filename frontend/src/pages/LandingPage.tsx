@@ -1,7 +1,6 @@
 /**
  * LandingPage — main marketing page composing all landing sections.
- * Displays TopBar, Navbar, Hero, BigNumbers, Features, Pricing, Calculator, FAQ,
- * RegisterSection, and Footer in order.
+ * Uses useAuth() to personalize Hero and Navbar for authenticated users.
  * @see TZ section 5.3 — Landing page sections
  */
 
@@ -15,16 +14,17 @@ import { Pricing } from "@/components/sections/Pricing";
 import { Calculator } from "@/components/sections/Calculator";
 import { FAQ } from "@/components/sections/FAQ";
 import { RegisterSection } from "@/components/sections/RegisterSection";
-
-interface LandingPageProps extends Record<string, never> {}
+import { useAuth } from "@/hooks/useAuth";
 
 /** Landing page — all marketing sections composed together */
-export const LandingPage: React.FC<LandingPageProps> = () => {
+export const LandingPage: React.FC = () => {
+  const { user, loading, logout } = useAuth();
+
   return (
     <div className="min-h-screen">
       <TopBar />
-      <Navbar />
-      <Hero />
+      <Navbar user={user} onLogout={logout} />
+      <Hero user={user} loading={loading} />
       <BigNumbers />
       <Features />
       <Pricing />

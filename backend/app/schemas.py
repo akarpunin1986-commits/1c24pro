@@ -377,6 +377,24 @@ class HealthResponse(BaseModel):
     uptime: float
 
 
+# ── User Status (for personalized landing) ────────────────────────────────────
+
+
+class UserStatusResponse(BaseModel):
+    """Lightweight user status for personalized UI on landing page."""
+
+    user_id: str
+    phone: str
+    role: str
+    status: str  # "trial" | "trial_ending" | "expired" | "active"
+    trial_days_left: int
+    trial_ends_at: str | None = None
+    org_name: str
+    org_inn: str
+    tariff: str | None = None
+    tariff_active_until: str | None = None
+
+
 # ── Generic ───────────────────────────────────────────────────────────────────
 
 

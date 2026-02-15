@@ -1,18 +1,24 @@
 /**
  * Navbar — fixed navigation bar with logo, links, and auth buttons.
- * Shows shadow on scroll. Links to sections on landing page.
+ * Personalized for authenticated users: shows org name + dashboard link.
  * @see TZ section 5.3 — Navbar description
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { NAV_LINKS } from "@/constants/design";
+import type { UserStatus } from "@/hooks/useAuth";
 
-interface NavbarProps extends Record<string, never> {}
+interface NavbarProps {
+  user?: UserStatus | null;
+  onLogout?: () => void;
+}
 
 /** Main navigation bar component */
-export const Navbar: React.FC<NavbarProps> = () => {
+export const Navbar: React.FC<NavbarProps> = ({ user = null, onLogout }) => {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = (): void => {
@@ -23,6 +29,19 @@ export const Navbar: React.FC<NavbarProps> = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent): void => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClick);
+      return () => document.removeEventListener("mousedown", handleClick);
+    }
+  }, [menuOpen]);
 
   return (
     <nav
@@ -52,21 +71,67 @@ export const Navbar: React.FC<NavbarProps> = () => {
           ))}
         </div>
 
-        {/* Auth buttons */}
-        <div className="flex items-center gap-3">
-          <Link
-            to="/auth"
-            className="rounded-button px-4 py-2 text-sm font-medium text-dark transition-colors hover:bg-bg-gray"
-          >
-            Войти
-          </Link>
-          <Link
-            to="/auth"
-            className="rounded-button bg-dark px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-dark-hover"
-          >
-            Начать бесплатно
-          </Link>
-        </div>
+        {/* Auth area */}
+        {user ? (
+          /* Authenticated user */
+          <div className="relative flex items-center gap-3" ref={menuRef}>
+            <Link
+              to="/dashboard"
+              className="rounded-button bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
+            >
+              Личный кабинет
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-button px-3 py-2 text-sm font-medium text-dark transition-colors hover:bg-bg-gray"
+            >
+              <span className="hidden sm:inline">{user.org_name || user.phone}</span>
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown */}
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-gray-200 bg-white py-2 shadow-lg">
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Личный кабинет
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onLogout?.();
+                  }}
+                  className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                >
+                  Выйти
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Guest */
+          <div className="flex items-center gap-3">
+            <Link
+              to="/auth"
+              className="rounded-button px-4 py-2 text-sm font-medium text-dark transition-colors hover:bg-bg-gray"
+            >
+              Войти
+            </Link>
+            <Link
+              to="/auth"
+              className="rounded-button bg-dark px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-dark-hover"
+            >
+              Начать бесплатно
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );
