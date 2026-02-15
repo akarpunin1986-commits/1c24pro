@@ -4,7 +4,7 @@
  * @see TZ section 2.1 — Passwordless auth flow
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PhoneForm } from "@/components/forms/PhoneForm";
 import { OTPInput } from "@/components/forms/OTPInput";
@@ -20,6 +20,14 @@ export const AuthPage: React.FC = () => {
   const [tempToken, setTempToken] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const handleCodeSent = (phoneNumber: string, _isNewUser: boolean): void => {
     setPhone(phoneNumber);
