@@ -1,0 +1,106 @@
+# ═══ PROJECT: 1C24.PRO ═══
+# SaaS облачная 1С | FastAPI + React + TypeScript
+# Главный источник правды: TZ.md
+
+## CRITICAL RULES — НАРУШЕНИЕ = ОТКАТ
+- НИКОГДА не удалять и не перезаписывать рабочий код без явного запроса
+- ВСЕГДА читать файл ЦЕЛИКОМ перед изменением
+- НЕ ВЫДУМЫВАЙ API endpoints, модели или типы — ТОЛЬКО из TZ.md
+- При ошибке — найди и исправь КОНКРЕТНУЮ проблему, НЕ переписывай всё
+- НИКОГДА не хардкодить ключи, URL, пароли — ТОЛЬКО через .env / config
+- Перед каждым значимым изменением: git add + git commit
+
+## MEMORY MANAGEMENT — НАЧАЛО КАЖДОЙ СЕССИИ
+При старте новой сессии ОБЯЗАТЕЛЬНО прочитай:
+1. TZ.md — полное техзадание
+2. ARCHITECTURE.md — что уже сделано, что в работе
+3. CHANGELOG.md — последние изменения
+4. TODO.md — текущие задачи
+Если этих файлов нет — создай их.
+
+## VERSION CONTROL
+- Формат коммитов: <type>(<scope>): <описание на русском или английском>
+- Типы: feat, fix, refactor, docs, test, chore, style, perf
+- Скоупы: auth, landing, pricing, inn, otp, db, ci, api
+- Feature-ветки: feature/<scope>-<что делаем>
+- Фикс-ветки: fix/<что чиним>
+- ВСЕГДА обновлять CHANGELOG.md и ARCHITECTURE.md после завершения фичи
+
+## ARCHITECTURE
+- Auth: PASSWORDLESS (телефон + SMS-код, НЕТ пароля)
+  - /auth/send-code → /auth/verify-code → (новый?) /auth/complete-registration
+  - Вход и регистрация — ОДНА точка входа (одна форма)
+  - JWT access 60 мин + refresh 30 дней
+- Upload: CHUNKED (5 МБ chunks, resume, до 50 ГБ)
+  - /uploads/init → chunk → complete → уведомление админу
+- Модели: Organization, User, OTPLog, Invite, Upload, Database, Payment, Subscription
+- Роли MVP: owner (всё) и user (только смотреть/работать в 1С)
+- Мультиюзер: owner приглашает по телефону → SMS → accept-invite
+- Оплата: ЮKassa (карты + СБП + счета юрлиц)
+- Telegram: заглушка если нет токена в .env
+- НЕТ open mode на MVP, НЕТ роли admin на MVP
+- Страницы: LandingPage, AuthPage, DashboardPage, AdminPage
+- Базы разворачиваются ВРУЧНУЮ админом на MVP
+- Стили — Tailwind utility classes, НЕ inline styles
+
+## PYTHON (Backend)
+- FastAPI + async everywhere
+- Type hints на КАЖДОЙ функции (параметры + возврат)
+- Docstring на КАЖДОЙ функции и классе
+- Pydantic v2 для всех schemas (BaseModel, field_validator)
+- SQLAlchemy 2.0 async для моделей
+- Магические числа → constants.py
+- Максимум 50 строк на функцию, 300 на файл
+- Линтер: ruff (запускать перед коммитом)
+- Тесты: pytest + httpx AsyncClient, mock внешние API
+
+## TYPESCRIPT (Frontend)
+- strict: true в tsconfig.json
+- НИКАКИХ any — типизировать ВСЁ
+- JSDoc на экспортируемых функциях и компонентах
+- Props интерфейсы для каждого компонента
+- Стили: Tailwind utility classes, НЕ inline style objects
+- Состояние: React hooks (useState, useEffect), НЕ redux
+- API вызовы: ТОЛЬКО через api/ директорию (типизированные функции)
+- Переиспользуемые компоненты → components/ui/
+- Константы (цены, цвета, тексты) → constants/ (НЕ хардкодить в JSX)
+
+## FILE STRUCTURE — НЕ НАРУШАТЬ
+```
+backend/
+  app/
+    main.py, config.py, database.py, models.py, schemas.py
+    auth.py, dependencies.py, exceptions.py, constants.py
+    routes/    → auth.py, inn.py, health.py
+    services/  → dadata.py, sms.py, email.py, otp.py
+  tests/     → conftest.py, test_*.py
+  alembic/   → миграции
+
+frontend/
+  src/
+    components/
+      layout/    → Navbar, Footer, TopBar
+      sections/  → Hero, BigNumbers, Features, Pricing, Calculator, FAQ, Register
+      ui/        → Button, Input, Badge, Card, Accordion
+      forms/     → RegisterForm, OTPInput
+    hooks/       → useInView, useCounter, useDebounce
+    api/         → client, auth, inn
+    types/       → api.ts, common.ts
+    constants/   → plans, design, faq
+    utils/       → formatters, validators
+```
+
+## DESIGN SYSTEM
+- Primary: #F97316 (оранжевый)
+- Dark: #1C1917 (текст, кнопки)
+- Background: #FAFAF8
+- Font: system-ui, -apple-system, sans-serif
+- Скругления: 10-12px кнопки, 16-20px карточки
+- Анимации: scroll-reveal с cubic-bezier(0.16,1,0.3,1)
+
+## QUALITY GATES — ПЕРЕД КАЖДЫМ КОММИТОМ
+1. ruff check backend/ (Python lint)
+2. cd frontend && npm run lint (TS lint)
+3. cd backend && pytest -v (backend tests)
+4. Нет TODO/FIXME без тикета
+5. CHANGELOG.md обновлён

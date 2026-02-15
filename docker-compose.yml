@@ -1,0 +1,76 @@
+services:
+  # ── Infrastructure ────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: 1c24pro-postgres
+    environment:
+      POSTGRES_DB: 1c24pro
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d 1c24pro"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: 1c24pro-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend (FastAPI) ─────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    container_name: 1c24pro-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/1c24pro
+      REDIS_URL: redis://redis:6379/0
+      DEBUG: "true"
+      ENVIRONMENT: development
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:5173","https://1c24.pro"]'
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/tests:/app/tests
+      - ./backend/alembic:/app/alembic
+    ports:
+      - "8000:8000"
+
+  # ── Frontend (React + Vite) ───────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    container_name: 1c24pro-frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+    driver: local
