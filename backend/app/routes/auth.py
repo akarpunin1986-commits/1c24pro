@@ -81,9 +81,13 @@ async def send_code(body: PhoneRequest, db: AsyncSession = Depends(get_db)) -> S
     """Send an OTP code to the given phone number via SMS."""
     phone = body.phone
 
-    # Check cooldown
+    # Check cooldown (60 sec between sends)
     if await otp.check_cooldown(phone):
         raise RateLimitError("Подождите 60 секунд перед повторной отправкой")
+
+    # Check daily SMS limit (max 10 per day per phone)
+    if await otp.check_daily_limit(phone, max_daily=10):
+        raise RateLimitError("Превышен лимит SMS на сегодня. Попробуйте завтра.")
 
     # Check if user exists
     result = await db.execute(select(User).where(User.phone == phone))
@@ -99,6 +103,9 @@ async def send_code(body: PhoneRequest, db: AsyncSession = Depends(get_db)) -> S
     message = f"1C24.PRO — код подтверждения: {code}. Никому не сообщайте."
     await sms.send_sms(phone, message)
 
+    # Increment daily SMS counter
+    await otp.increment_daily_counter(phone)
+
     logger.info("OTP sent to %s (new_user=%s)", phone, is_new_user)
     return SendCodeResponse(sent=True, is_new_user=is_new_user, ttl=300)
 
@@ -108,6 +115,12 @@ async def verify_code(body: OTPVerifyRequest, db: AsyncSession = Depends(get_db)
     """Verify an OTP code for phone authentication."""
     phone = body.phone
     code = body.code
+
+    # Check brute-force attempts BEFORE verification (max 5 per OTP)
+    attempts = await otp.get_attempts_count(phone)
+    if attempts >= settings.OTP_MAX_ATTEMPTS:
+        await otp.delete_otp(phone)
+        raise RateLimitError("Слишком много попыток. Запросите новый код.")
 
     # Verify OTP against Redis
     is_valid = await otp.verify_otp(phone, code)

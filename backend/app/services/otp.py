@@ -131,3 +131,60 @@ async def set_cooldown(phone: str) -> None:
     """
     r = await _get_redis()
     await r.setex(f"otp_cooldown:{phone}", settings.OTP_COOLDOWN_SECONDS, 1)
+
+
+async def delete_otp(phone: str) -> None:
+    """Delete stored OTP and attempts counter for a phone number.
+
+    Args:
+        phone: The phone number whose OTP should be deleted.
+    """
+    r = await _get_redis()
+    pipe = r.pipeline()
+    pipe.delete(f"otp:{phone}")
+    pipe.delete(f"otp_attempts:{phone}")
+    await pipe.execute()
+
+
+async def check_daily_limit(phone: str, max_daily: int = 10) -> bool:
+    """Check whether the phone has exceeded the daily SMS limit.
+
+    Args:
+        phone: The phone number to check.
+        max_daily: Maximum SMS allowed per 24h (default 10).
+
+    Returns:
+        True if the limit is exceeded (must block).
+    """
+    r = await _get_redis()
+    daily_key = f"sms_daily:{phone}"
+    count = await r.get(daily_key)
+    return count is not None and int(count) >= max_daily
+
+
+async def increment_daily_counter(phone: str) -> None:
+    """Increment the daily SMS counter for a phone number.
+
+    Sets 24h TTL on the counter key.
+
+    Args:
+        phone: The phone number to increment counter for.
+    """
+    r = await _get_redis()
+    daily_key = f"sms_daily:{phone}"
+    await r.incr(daily_key)
+    await r.expire(daily_key, 86400)
+
+
+async def get_attempts_count(phone: str) -> int:
+    """Get the current OTP verification attempts count.
+
+    Args:
+        phone: The phone number to check.
+
+    Returns:
+        Number of failed attempts.
+    """
+    r = await _get_redis()
+    attempts_raw = await r.get(f"otp_attempts:{phone}")
+    return int(attempts_raw) if attempts_raw is not None else 0

@@ -62,3 +62,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Fail fast if JWT_SECRET is default in production
+if settings.ENVIRONMENT == "production" and settings.JWT_SECRET in (
+    "dev-secret-change-in-production",
+    "dev_jwt_secret_change_in_production_min_32_chars_long_1c24pro",
+):
+    raise RuntimeError("CRITICAL: JWT_SECRET must be changed in production! Set it in .env")
