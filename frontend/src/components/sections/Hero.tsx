@@ -44,22 +44,35 @@ export const Hero: React.FC<HeroProps> = () => {
             </a>
           </div>
 
-          {/* Trust badges */}
-          <div className="flex flex-wrap gap-3 pt-4">
-            {[
-              { icon: "🛡️", text: "Серверы в РФ" },
-              { icon: "✅", text: "SLA 99.9%" },
-              { icon: "💾", text: "Ежедневные бэкапы" },
-              { icon: "💳", text: "Оплата по РФ" },
-            ].map((badge) => (
-              <span
-                key={badge.text}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-white px-3 py-1.5 text-xs font-medium text-text-muted"
-              >
-                <span className="text-sm">{badge.icon}</span>
-                {badge.text}
-              </span>
-            ))}
+          {/* Trust Badges */}
+          <div className="flex flex-wrap items-center gap-6 pt-4 text-base text-gray-500">
+            <span className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+              </svg>
+              Серверы в РФ
+            </span>
+            <span className="text-gray-300">|</span>
+            <span className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+              SLA 99.9%
+            </span>
+            <span className="text-gray-300">|</span>
+            <span className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
+              </svg>
+              Ежедневные бэкапы
+            </span>
+            <span className="text-gray-300">|</span>
+            <span className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+              Любая оплата
+            </span>
           </div>
         </div>
 
