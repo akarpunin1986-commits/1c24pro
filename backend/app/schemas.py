@@ -158,7 +158,8 @@ class UserProfileResponse(BaseModel):
     status: str
     referral_code: str
     organization: OrganizationResponse
-    trial_ends_at: datetime
+    trial_started_at: datetime | None = None
+    trial_ends_at: datetime | None = None
     created_at: datetime
 
 
@@ -394,8 +395,9 @@ class UserStatusResponse(BaseModel):
     user_id: str
     phone: str
     role: str
-    status: str  # "trial" | "trial_ending" | "expired" | "active"
+    status: str  # "trial_not_started" | "trial" | "trial_ending" | "expired" | "active"
     trial_days_left: int
+    trial_started_at: str | None = None
     trial_ends_at: str | None = None
     org_name: str
     org_inn: str

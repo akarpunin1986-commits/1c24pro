@@ -33,6 +33,7 @@ interface MeData {
   status: string;
   referral_code: string;
   organization: OrgInfo;
+  trial_started_at: string | null;
   trial_ends_at: string;
   created_at: string;
 }
@@ -198,7 +199,10 @@ export const DashboardPage: React.FC = () => {
   const trialDaysLeft = me && me.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(me.trial_ends_at).getTime() - Date.now()) / 86400000))
     : 0;
-  const trialPercent = Math.max(0, Math.min(100, (trialDaysLeft / 30) * 100));
+  const totalTrialDays = me && me.trial_ends_at && me.trial_started_at
+    ? Math.ceil((new Date(me.trial_ends_at).getTime() - new Date(me.trial_started_at).getTime()) / 86400000)
+    : 30;
+  const trialPercent = Math.max(0, Math.min(100, ((totalTrialDays - trialDaysLeft) / totalTrialDays) * 100));
 
   /* ── Upload handler ────────────────────────────── */
   const handleUpload = async (): Promise<void> => {

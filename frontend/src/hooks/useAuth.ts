@@ -12,6 +12,7 @@ export interface UserStatus {
   role: string;
   status: "trial_not_started" | "trial" | "trial_ending" | "expired" | "active";
   trial_days_left: number;
+  trial_started_at: string | null;
   trial_ends_at: string | null;
   org_name: string;
   org_inn: string;

@@ -334,6 +334,7 @@ async def get_auth_me(
         role=user.role,
         status=status,
         trial_days_left=trial_days_left,
+        trial_started_at=user.trial_started_at.isoformat() if user.trial_started_at else None,
         trial_ends_at=user.trial_ends_at.isoformat() if user.trial_ends_at else None,
         org_name=org.name_short if org else "",
         org_inn=org.inn if org else "",

@@ -295,11 +295,19 @@ const TrustBadges: React.FC = () => (
 
 /* ── Trial progress bar ──────────────────────────────────────────────── */
 
-const TrialProgressBar: React.FC<{ daysLeft: number; color?: string }> = ({
-  daysLeft,
-  color = "bg-primary",
-}) => {
-  const pct = Math.max(0, Math.min(100, ((30 - daysLeft) / 30) * 100));
+const TrialProgressBar: React.FC<{
+  daysLeft: number;
+  trialStartedAt?: string | null;
+  trialEndsAt?: string | null;
+  color?: string;
+}> = ({ daysLeft, trialStartedAt, trialEndsAt, color = "bg-primary" }) => {
+  const totalDays =
+    trialStartedAt && trialEndsAt
+      ? Math.ceil(
+          (new Date(trialEndsAt).getTime() - new Date(trialStartedAt).getTime()) / 86400000,
+        )
+      : 30;
+  const pct = Math.max(0, Math.min(100, ((totalDays - daysLeft) / totalDays) * 100));
   return (
     <div className="mt-2 h-2 w-full max-w-md overflow-hidden rounded-full bg-gray-200">
       <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
@@ -407,7 +415,7 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
               </Link>
               <a href="#pricing">
                 <Button variant="outline" size="lg">
-                  Как это работает
+                  Посмотреть тарифы
                 </Button>
               </a>
             </div>
@@ -446,7 +454,12 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
               </span>
             </p>
 
-            <TrialProgressBar daysLeft={user.trial_days_left} color="bg-primary" />
+            <TrialProgressBar
+              daysLeft={user.trial_days_left}
+              trialStartedAt={user.trial_started_at}
+              trialEndsAt={user.trial_ends_at}
+              color="bg-primary"
+            />
 
             <div className="flex flex-wrap gap-3 pt-2">
               <Link to="/dashboard">
@@ -494,7 +507,12 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
               Осталось {user.trial_days_left} {pluralDays(user.trial_days_left)} — выберите тариф, чтобы не потерять данные
             </p>
 
-            <TrialProgressBar daysLeft={user.trial_days_left} color="bg-orange-500" />
+            <TrialProgressBar
+              daysLeft={user.trial_days_left}
+              trialStartedAt={user.trial_started_at}
+              trialEndsAt={user.trial_ends_at}
+              color="bg-orange-500"
+            />
 
             <div className="flex flex-wrap gap-3 pt-2">
               <a href="#pricing">

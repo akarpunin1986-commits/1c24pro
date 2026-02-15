@@ -14,23 +14,24 @@ import { formatPrice } from "@/utils/formatters";
 
 interface PricingProps {
   title?: string;
+  subtitle?: string;
 }
 
 /** Annual discount percentage */
 const ANNUAL_DISCOUNT = 0.15;
 
 /** Pricing cards section */
-export const Pricing: React.FC<PricingProps> = ({ title }) => {
+export const Pricing: React.FC<PricingProps> = ({ title, subtitle }) => {
   const [isAnnual, setIsAnnual] = useState(false);
 
   return (
     <section id="pricing" className="bg-bg-gray py-20">
       <div className="mx-auto max-w-7xl px-6">
-        <h2 className="mb-4 text-center text-3xl font-extrabold text-dark md:text-[42px]">
+        <h2 className="mb-4 text-center text-3xl font-bold text-dark">
           {title || "Тарифы"}
         </h2>
-        <p className="mb-8 text-center text-text-muted">
-          Все тарифы включают бэкапы, обновления, конфигуратор по RDP и техподдержку
+        <p className="mb-8 text-center text-base text-gray-500">
+          {subtitle || "Все тарифы включают бэкапы, обновления, конфигуратор по RDP и техподдержку"}
         </p>
 
         {/* Period toggle — pill-style switcher */}

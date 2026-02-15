@@ -65,7 +65,7 @@ export const Calculator: React.FC<CalculatorProps> = () => {
   return (
     <section id="calculator" className="bg-bg py-20">
       <div className="mx-auto max-w-3xl px-6">
-        <h2 className="mb-12 text-center text-3xl font-extrabold text-dark md:text-[42px]">
+        <h2 className="mb-12 text-center text-3xl font-bold text-dark">
           Калькулятор
         </h2>
 

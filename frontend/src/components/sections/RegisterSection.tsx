@@ -16,7 +16,7 @@ export const RegisterSection: React.FC<RegisterSectionProps> = () => {
     <section className="bg-primary py-20">
       <div className="mx-auto max-w-3xl px-6">
         <Card padding="lg" bordered={false} className="text-center shadow-xl">
-          <h2 className="text-3xl font-extrabold text-dark">
+          <h2 className="text-3xl font-bold text-dark">
             Начните работать в облаке уже сегодня
           </h2>
           <p className="mt-3 text-text-muted">

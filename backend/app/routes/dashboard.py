@@ -71,6 +71,7 @@ async def get_me(
         status=current_user.status,
         referral_code=current_user.referral_code,
         organization=org_response,
+        trial_started_at=current_user.trial_started_at,
         trial_ends_at=current_user.trial_ends_at,
         created_at=current_user.created_at,
     )

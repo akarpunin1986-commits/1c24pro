@@ -15,7 +15,6 @@ import { Pricing } from "@/components/sections/Pricing";
 import { Calculator } from "@/components/sections/Calculator";
 import { FAQ } from "@/components/sections/FAQ";
 import { RegisterSection } from "@/components/sections/RegisterSection";
-import { TrialCTA } from "@/components/sections/TrialCTA";
 import { UpsellBlock } from "@/components/sections/UpsellBlock";
 import { PartnerBlock } from "@/components/sections/PartnerBlock";
 import { useAuth } from "@/hooks/useAuth";
@@ -76,21 +75,26 @@ export const LandingPage: React.FC = () => {
         </>
       )}
 
-      {/* Trial / trial not started: nudge to choose a tariff */}
+      {/* Trial / trial not started: pricing + calculator */}
       {(isTrial || isTrialNotStarted) && (
         <>
-          <TrialCTA />
-          <Pricing title={isTrialNotStarted
-            ? "Тарифы — 30 дней бесплатно после загрузки базы"
-            : "Выберите тариф до окончания тестового периода"
-          } />
+          <Pricing
+            title="Тарифы"
+            subtitle={isTrialNotStarted
+              ? "Все тарифы включают бэкапы, обновления, конфигуратор по RDP и техподдержку. 30 дней бесплатно."
+              : "Все тарифы включают бэкапы, обновления, конфигуратор по RDP и техподдержку."
+            }
+          />
           <Calculator />
         </>
       )}
 
       {/* Expired: bring back to payment */}
       {isExpired && (
-        <Pricing title="Выберите тариф, чтобы разморозить базы" />
+        <Pricing
+          title="Выберите тариф, чтобы разморозить базы"
+          subtitle="Ваши данные в безопасности. После оплаты базы будут доступны в течение часа."
+        />
       )}
 
       {/* Active on Start: upsell to Business */}
