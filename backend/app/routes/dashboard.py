@@ -47,13 +47,17 @@ async def get_me(
         status=org.status if org else "ACTIVE",
     )
 
-    # Build display_name: "Имя Отчество" or phone as fallback
-    if current_user.first_name:
-        display_name = current_user.first_name
-        if current_user.patronymic:
-            display_name += f" {current_user.patronymic}"
+    # Build display_name: "Имя Отчество", fallback to director_name, never phone
+    first = current_user.first_name
+    patr = current_user.patronymic
+    if not first and current_user.is_owner and org and org.director_name:
+        parts = org.director_name.strip().split()
+        first = parts[1] if len(parts) >= 2 else ""
+        patr = parts[2] if len(parts) >= 3 else ""
+    if first:
+        display_name = f"{first} {patr}".strip() if patr else first
     else:
-        display_name = current_user.phone
+        display_name = ""
 
     return UserProfileResponse(
         id=current_user.id,

@@ -31,13 +31,13 @@ def _generate_referral_code() -> str:
 
 
 def _build_display_name(user: User) -> str:
-    """Build 'Имя Отчество' or phone fallback."""
+    """Build 'Имя Отчество' — never returns phone."""
     if user.first_name:
         name = user.first_name
         if user.patronymic:
             name += f" {user.patronymic}"
         return name
-    return user.phone
+    return ""
 
 
 @router.post("/invite", response_model=InviteResponse)

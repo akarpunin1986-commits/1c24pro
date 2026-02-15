@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user = null, onLogout }) => {
               onClick={() => setMenuOpen((v) => !v)}
               className="flex items-center gap-2 rounded-button px-3 py-2 text-sm font-medium text-dark transition-colors hover:bg-bg-gray"
             >
-              <span className="hidden sm:inline">{user.display_name}</span>
+              <span className="hidden sm:inline">{user.display_name || user.org_name}</span>
               <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>

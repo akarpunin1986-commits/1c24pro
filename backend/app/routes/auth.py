@@ -315,13 +315,15 @@ async def get_auth_me(
 
     # TODO: Check if user has active paid subscription — override status to "active"
 
-    # Build display_name: "Имя Отчество" or phone as fallback
-    if user.first_name:
-        display_name = user.first_name
-        if user.patronymic:
-            display_name += f" {user.patronymic}"
+    # Build display_name: "Имя Отчество", fallback to director_name, never phone
+    first = user.first_name
+    patr = user.patronymic
+    if not first and user.is_owner and org and org.director_name:
+        _, first, patr = _parse_fio(org.director_name)
+    if first:
+        display_name = f"{first} {patr}".strip() if patr else first
     else:
-        display_name = user.phone
+        display_name = ""
 
     return UserStatusResponse(
         user_id=str(user.id),

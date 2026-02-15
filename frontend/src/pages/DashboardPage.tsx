@@ -348,7 +348,7 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-gray-900">
-                {me.display_name || formatPhoneDisplay(me.phone)}
+                {me.display_name || me.organization.name_short}
               </p>
               <p className="text-xs text-gray-400">{formatPhoneDisplay(me.phone)}</p>
             </div>

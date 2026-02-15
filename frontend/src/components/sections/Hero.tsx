@@ -200,7 +200,7 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             </span>
 
             <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-              Добро пожаловать, {user.display_name}
+              Добро пожаловать{user.display_name ? `, ${user.display_name}` : ""}
             </h1>
 
             <p className="text-sm text-text-muted">
@@ -252,7 +252,7 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
             </div>
 
             <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-              {user.display_name}, ваш тестовый период заканчивается
+              {user.display_name ? `${user.display_name}, ваш` : "Ваш"} тестовый период заканчивается
             </h1>
 
             <p className="text-sm text-text-muted">
@@ -326,7 +326,7 @@ export const Hero: React.FC<HeroProps> = ({ user = null, loading = false }) => {
           </span>
 
           <h1 className="text-4xl font-extrabold leading-tight text-dark md:text-5xl">
-            Добро пожаловать, {user.display_name}
+            Добро пожаловать{user.display_name ? `, ${user.display_name}` : ""}
           </h1>
 
           <p className="text-sm text-text-muted">
