@@ -55,7 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       onClick={onClick}
       className={`
-        inline-flex items-center justify-center rounded-button font-medium
+        inline-flex cursor-pointer items-center justify-center rounded-button font-medium
         transition-all duration-200
         disabled:cursor-not-allowed disabled:opacity-50
         ${VARIANT_CLASSES[variant]}

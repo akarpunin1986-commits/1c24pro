@@ -45,18 +45,19 @@ export const Hero: React.FC<HeroProps> = () => {
           </div>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap gap-4 pt-4">
+          <div className="flex flex-wrap gap-3 pt-4">
             {[
-              "Серверы в РФ",
-              "SLA 99.9%",
-              "Ежедневные бэкапы",
-              "Оплата по РФ",
+              { icon: "🛡️", text: "Серверы в РФ" },
+              { icon: "✅", text: "SLA 99.9%" },
+              { icon: "💾", text: "Ежедневные бэкапы" },
+              { icon: "💳", text: "Оплата по РФ" },
             ].map((badge) => (
               <span
-                key={badge}
-                className="rounded-full border border-border-light bg-white px-3 py-1.5 text-xs font-medium text-text-muted"
+                key={badge.text}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-white px-3 py-1.5 text-xs font-medium text-text-muted"
               >
-                {badge}
+                <span className="text-sm">{badge.icon}</span>
+                {badge.text}
               </span>
             ))}
           </div>

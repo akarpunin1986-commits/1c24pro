@@ -31,29 +31,32 @@ export const Pricing: React.FC<PricingProps> = () => {
           Все тарифы включают бэкапы, обновления, конфигуратор по RDP и техподдержку
         </p>
 
-        {/* Period toggle */}
-        <div className="mb-12 flex items-center justify-center gap-3">
-          <span className={`text-sm ${!isAnnual ? "font-medium text-dark" : "text-text-muted"}`}>
-            Помесячно
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setIsAnnual((prev) => !prev);
-            }}
-            className={`relative h-7 w-12 rounded-full transition-colors ${
-              isAnnual ? "bg-primary" : "bg-border"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
-                isAnnual ? "translate-x-5" : "translate-x-0.5"
+        {/* Period toggle — pill-style switcher */}
+        <div className="mb-12 flex items-center justify-center">
+          <div className="inline-flex rounded-full bg-gray-100 p-1">
+            <button
+              type="button"
+              onClick={() => setIsAnnual(false)}
+              className={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 ${
+                !isAnnual
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
-            />
-          </button>
-          <span className={`text-sm ${isAnnual ? "font-medium text-dark" : "text-text-muted"}`}>
-            Годовой (−15%)
-          </span>
+            >
+              Помесячно
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAnnual(true)}
+              className={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 ${
+                isAnnual
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Годовой (−15%)
+            </button>
+          </div>
         </div>
 
         {/* Plan cards */}
@@ -67,7 +70,11 @@ export const Pricing: React.FC<PricingProps> = () => {
               <Card
                 key={plan.id}
                 padding="lg"
-                className={`relative ${plan.popular ? "border-2 border-primary shadow-lg" : ""}`}
+                className={`relative transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] ${
+                  plan.popular
+                    ? "border-2 border-primary shadow-lg hover:shadow-[0_16px_48px_rgba(255,107,0,0.2)]"
+                    : "hover:border-gray-300"
+                }`}
               >
                 {plan.popular ? (
                   <Badge variant="orange" className="absolute -top-3 right-6">
