@@ -2,15 +2,16 @@
 
 import logging
 
-import httpx
-
 from app.config import settings
+from app.core.http_client import get_http_client
 
 logger = logging.getLogger(__name__)
 
 
 async def find_by_inn(inn: str) -> dict[str, str | None]:
     """Look up an organization by INN via the DaData API.
+
+    Uses the global HTTP client with connection pooling.
 
     Args:
         inn: Russian tax identification number (10 or 12 digits).
@@ -30,10 +31,10 @@ async def find_by_inn(inn: str) -> dict[str, str | None]:
         "Authorization": f"Token {settings.DADATA_API_KEY}",
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json={"query": inn}, headers=headers)
-        response.raise_for_status()
-        data = response.json()
+    client = await get_http_client()
+    response = await client.post(url, json={"query": inn}, headers=headers)
+    response.raise_for_status()
+    data = response.json()
 
     suggestions = data.get("suggestions", [])
     if not suggestions:

@@ -5,7 +5,7 @@ import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,6 +43,7 @@ def _build_display_name(user: User) -> str:
 @router.post("/invite", response_model=InviteResponse)
 async def invite(
     body: InviteRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(require_owner),
     db: AsyncSession = Depends(get_db),
 ) -> InviteResponse:
@@ -77,21 +78,17 @@ async def invite(
     db.add(user)
     await db.flush()
 
-    # Send SMS invitation
-    try:
-        from app.services import sms as sms_service
-        msg = f"Вас пригласили в 1C24.PRO. Войдите: https://1c24.pro/auth"
-        await sms_service.send_sms(body.phone, msg)
-    except Exception:
-        logger.warning("Failed to send invite SMS to %s", body.phone)
+    # Send SMS invitation (non-blocking)
+    from app.services import sms as sms_service
 
-    # Notify admin
-    try:
-        from app.services import sms as sms_service
-        admin_msg = f"1C24.PRO: приглашение сотрудника\nТел: {body.phone}\nИмя: {body.first_name} {body.last_name or ''}"
-        await sms_service.send_sms(settings.ADMIN_PHONE, admin_msg)
-    except Exception:
-        logger.warning("Failed to send admin invite notification")
+    background_tasks.add_task(
+        sms_service.send_sms, body.phone,
+        "Вас пригласили в 1C24.PRO. Войдите: https://1c24.pro/auth",
+    )
+
+    # Notify admin (non-blocking)
+    admin_msg = f"1C24.PRO: приглашение сотрудника\nТел: {body.phone}\nИмя: {body.first_name} {body.last_name or ''}"
+    background_tasks.add_task(sms_service.send_sms, settings.ADMIN_PHONE, admin_msg)
 
     return InviteResponse(
         id=user.id,

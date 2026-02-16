@@ -145,7 +145,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit }) 
         />
         <span className="text-sm text-gray-600">
           Принимаю условия{" "}
-          <a href="/oferta" target="_blank" className="text-primary hover:underline" rel="noreferrer">
+          <a href="/offer" target="_blank" className="text-primary hover:underline" rel="noreferrer">
             оферты
           </a>
         </span>

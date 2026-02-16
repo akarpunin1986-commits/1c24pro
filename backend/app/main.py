@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.core.http_client import close_http_client
 from app.routes import admin, auth, dashboard, health, inn, org, payments, subscription, upload
 
 _start_time: float = 0.0
@@ -19,6 +20,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     global _start_time  # noqa: PLW0603
     _start_time = time.time()
     yield
+    await close_http_client()
 
 
 def get_uptime() -> float:

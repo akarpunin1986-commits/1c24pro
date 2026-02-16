@@ -2,15 +2,16 @@
 
 import logging
 
-import httpx
-
 from app.config import settings
+from app.core.http_client import get_http_client
 
 logger = logging.getLogger(__name__)
 
 
 async def send_admin_notification(message: str) -> bool:
     """Send a notification message to the admin Telegram chat.
+
+    Uses the global HTTP client with connection pooling.
 
     Args:
         message: Text message to send.
@@ -28,14 +29,14 @@ async def send_admin_notification(message: str) -> bool:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url,
-                json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"},
-            )
-            response.raise_for_status()
-            logger.info("Telegram notification sent: %s", message[:80])
-            return True
-    except httpx.HTTPError as exc:
+        client = await get_http_client()
+        response = await client.post(
+            url,
+            json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"},
+        )
+        response.raise_for_status()
+        logger.info("Telegram notification sent: %s", message[:80])
+        return True
+    except Exception as exc:
         logger.error("Failed to send Telegram notification: %s", exc)
         return False

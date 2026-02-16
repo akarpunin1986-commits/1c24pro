@@ -22,10 +22,19 @@ export const Footer: React.FC<FooterProps> = () => {
           <span className="text-base font-bold text-dark">24.pro</span>
         </Link>
 
-        {/* Copyright */}
-        <p className="text-sm text-text-muted">
-          &copy; {currentYear} 1C24.PRO. Все права защищены.
-        </p>
+        {/* Links + Copyright */}
+        <div className="flex items-center gap-4">
+          <Link
+            to="/offer"
+            className="text-sm text-text-muted transition-colors hover:text-dark"
+          >
+            Оферта
+          </Link>
+          <span className="text-gray-300">|</span>
+          <p className="text-sm text-text-muted">
+            &copy; {currentYear} 1C24.PRO. Все права защищены.
+          </p>
+        </div>
       </div>
     </footer>
   );

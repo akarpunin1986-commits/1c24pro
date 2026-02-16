@@ -4,7 +4,7 @@ import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -25,6 +25,7 @@ router = APIRouter(prefix="/uploads", tags=["uploads"])
 @router.post("/init", response_model=UploadInitResponse)
 async def init_upload(
     body: UploadInitRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> UploadInitResponse:
@@ -48,19 +49,16 @@ async def init_upload(
         await db.flush()
         logger.info("Trial started for user %s (first database uploaded)", current_user.phone)
 
-    # Notify admin via SMS
-    try:
-        from app.services import sms as sms_service
+    # Notify admin via SMS (non-blocking)
+    from app.services import sms as sms_service
 
-        admin_msg = (
-            f"1C24.PRO: загрузка базы!\n"
-            f"{body.filename}\n"
-            f"Конфиг: {body.config_code}\n"
-            f"Размер: {body.size_bytes // (1024 * 1024)} МБ"
-        )
-        await sms_service.send_sms(settings.ADMIN_PHONE, admin_msg)
-    except Exception:
-        logger.warning("Failed to send admin upload notification")
+    admin_msg = (
+        f"1C24.PRO: загрузка базы!\n"
+        f"{body.filename}\n"
+        f"Конфиг: {body.config_code}\n"
+        f"Размер: {body.size_bytes // (1024 * 1024)} МБ"
+    )
+    background_tasks.add_task(sms_service.send_sms, settings.ADMIN_PHONE, admin_msg)
 
     return UploadInitResponse(
         upload_id=upload_id,

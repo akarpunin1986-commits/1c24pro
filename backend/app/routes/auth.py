@@ -5,7 +5,7 @@ import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, BackgroundTasks, Depends, Header
 from jose import JWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -87,7 +87,11 @@ def _make_org_slug(name_short: str) -> str:
 
 
 @router.post("/send-code", response_model=SendCodeResponse)
-async def send_code(body: PhoneRequest, db: AsyncSession = Depends(get_db)) -> SendCodeResponse:
+async def send_code(
+    body: PhoneRequest,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+) -> SendCodeResponse:
     """Send an OTP code to the given phone number via SMS."""
     phone = body.phone
 
@@ -109,12 +113,12 @@ async def send_code(body: PhoneRequest, db: AsyncSession = Depends(get_db)) -> S
     await otp.store_otp(phone, code)
     await otp.set_cooldown(phone)
 
-    # Send SMS
-    message = f"1C24.PRO — код подтверждения: {code}. Никому не сообщайте."
-    await sms.send_sms(phone, message)
-
     # Increment daily SMS counter
     await otp.increment_daily_counter(phone)
+
+    # Send SMS in background — user doesn't wait for SMS.ru response
+    message = f"1C24.PRO — код подтверждения: {code}. Никому не сообщайте."
+    background_tasks.add_task(sms.send_sms, phone, message)
 
     logger.info("OTP sent to %s (new_user=%s)", phone, is_new_user)
     return SendCodeResponse(sent=True, is_new_user=is_new_user, ttl=300)
@@ -165,6 +169,7 @@ async def verify_code(body: OTPVerifyRequest, db: AsyncSession = Depends(get_db)
 @router.post("/complete-registration", response_model=CompleteRegistrationResponse)
 async def complete_registration(
     body: CompleteRegistrationRequest,
+    background_tasks: BackgroundTasks,
     authorization: str = Header(..., alias="Authorization"),
     db: AsyncSession = Depends(get_db),
 ) -> CompleteRegistrationResponse:
@@ -249,12 +254,9 @@ async def complete_registration(
 
     logger.info("New registration: %s, org=%s", phone, org.name_short)
 
-    # Notify admin via SMS
-    try:
-        admin_msg = f"1C24.PRO: новый клиент!\n{org.name_short}\nИНН: {org.inn}\nТел: {phone}"
-        await sms.send_sms(settings.ADMIN_PHONE, admin_msg)
-    except Exception:
-        logger.warning("Failed to send admin notification SMS")
+    # Notify admin via SMS (non-blocking)
+    admin_msg = f"1C24.PRO: новый клиент!\n{org.name_short}\nИНН: {org.inn}\nТел: {phone}"
+    background_tasks.add_task(sms.send_sms, settings.ADMIN_PHONE, admin_msg)
 
     return CompleteRegistrationResponse(
         user_id=user.id,

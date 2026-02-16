@@ -4,9 +4,8 @@ import logging
 import uuid
 from decimal import Decimal
 
-import httpx
-
 from app.config import settings
+from app.core.http_client import get_http_client
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +19,8 @@ async def create_payment(
 ) -> dict[str, str]:
     """Create a payment through the YooKassa API.
 
+    Uses the global HTTP client with connection pooling.
+
     Args:
         amount: Payment amount.
         currency: Currency code (e.g., 'RUB').
@@ -30,7 +31,6 @@ async def create_payment(
     Returns:
         Dictionary with 'id' (YooKassa payment ID) and 'confirmation_url'.
     """
-    # TODO: implement real YooKassa API call
     logger.info("Creating YooKassa payment: %s %s — %s", amount, currency, description)
 
     if not settings.YOOKASSA_SHOP_ID or not settings.YOOKASSA_SECRET_KEY:
@@ -53,15 +53,15 @@ async def create_payment(
         "metadata": metadata,
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            json=payload,
-            headers=headers,
-            auth=(settings.YOOKASSA_SHOP_ID, settings.YOOKASSA_SECRET_KEY),
-        )
-        response.raise_for_status()
-        data = response.json()
+    client = await get_http_client()
+    response = await client.post(
+        url,
+        json=payload,
+        headers=headers,
+        auth=(settings.YOOKASSA_SHOP_ID, settings.YOOKASSA_SECRET_KEY),
+    )
+    response.raise_for_status()
+    data = response.json()
 
     return {
         "id": data.get("id", ""),
