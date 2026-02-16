@@ -11,7 +11,7 @@ export const OfferPage: React.FC = () => {
     <div className="flex min-h-screen flex-col bg-white">
       <Navbar user={null} />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-24">
         <h1 className="mb-2 text-center text-3xl font-bold text-gray-900">
           ПУБЛИЧНАЯ ОФЕРТА
         </h1>
