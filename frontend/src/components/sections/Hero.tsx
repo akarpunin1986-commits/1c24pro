@@ -5,6 +5,7 @@
  * @see TZ section 5.3 — Hero description
  */
 
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import type { UserStatus } from "@/hooks/useAuth";
@@ -52,71 +53,165 @@ const DB_ICONS: Record<string, { icon: string; color: string }> = {
   other: { icon: "📦", color: "bg-gray-100" },
 };
 
-/* ── Guest: Animated dashboard mockup ────────────────────────────────── */
+/* ── Guest: Rotating dashboard mockup ─────────────────────────────────── */
 
-const MOCK_DBS = [
-  { name: "Бухгалтерия 3.0", slug: "rassvet_bp30_1", size: "2.4", color: "bg-green-100", icon: "📗" },
-  { name: "ЗУП 3.1", slug: "rassvet_zup31_1", size: "1.8", color: "bg-blue-100", icon: "📘" },
-  { name: "Управление торговлей 11", slug: "rassvet_ut11_1", size: "5.1", color: "bg-amber-100", icon: "📙" },
+interface MockCompany {
+  name: string;
+  tariff: string;
+  activeUntil: string;
+  dbs: { name: string; slug: string; size: string; color: string; icon: string }[];
+  stats: { bases: number; basesLabel: string; users: number; usersLabel: string };
+}
+
+const COMPANIES: MockCompany[] = [
+  {
+    name: "ООО «Рассвет»",
+    tariff: "Бизнес",
+    activeUntil: "15.03.2026",
+    dbs: [
+      { name: "Бухгалтерия 3.0", slug: "rassvet_bp30_1", size: "0.8", color: "bg-green-100", icon: "📗" },
+      { name: "ЗУП 3.1", slug: "rassvet_zup31_1", size: "1.2", color: "bg-blue-100", icon: "📘" },
+      { name: "Управление торговлей 11", slug: "rassvet_ut11_1", size: "3.1", color: "bg-amber-100", icon: "📙" },
+    ],
+    stats: { bases: 3, basesLabel: "Базы", users: 5, usersLabel: "Пользователей" },
+  },
+  {
+    name: "ООО «Сортсемовощ»",
+    tariff: "Корпорация",
+    activeUntil: "01.06.2026",
+    dbs: [
+      { name: "Бухгалтерия 3.0", slug: "sso_bp30_1", size: "1.5", color: "bg-green-100", icon: "📗" },
+      { name: "ERP 2.5", slug: "sso_erp25_1", size: "8.4", color: "bg-red-100", icon: "📕" },
+      { name: "Документооборот 3.0", slug: "sso_doc30_1", size: "2.1", color: "bg-purple-100", icon: "📓" },
+      { name: "ЗУП 3.1", slug: "sso_zup31_1", size: "3.2", color: "bg-blue-100", icon: "📘" },
+    ],
+    stats: { bases: 4, basesLabel: "Базы", users: 12, usersLabel: "Пользователей" },
+  },
+  {
+    name: "ИП Карпунин А.А.",
+    tariff: "Старт",
+    activeUntil: "20.04.2026",
+    dbs: [
+      { name: "Бухгалтерия 3.0", slug: "karpunin_bp30_1", size: "0.3", color: "bg-green-100", icon: "📗" },
+    ],
+    stats: { bases: 1, basesLabel: "База", users: 1, usersLabel: "Пользователь" },
+  },
 ];
 
-const GuestMockup: React.FC = () => (
-  <div className="flex flex-1 items-center justify-center">
-    <div className="group relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-2xl">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-bold text-dark">ООО «Рассвет»</h3>
-          <p className="text-sm text-text-muted">Тариф: Бизнес | Активен до 15.03.2026</p>
-        </div>
-        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-          Всё работает
-        </span>
-      </div>
+const ROTATION_INTERVAL = 5000;
+const FADE_DURATION = 400;
 
-      {/* Animated database cards */}
-      <div className="space-y-3">
-        {MOCK_DBS.map((db, idx) => (
-          <div
-            key={db.slug}
-            className="flex animate-fadeInUp items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 opacity-0 transition-all duration-200 hover:translate-x-1 hover:bg-gray-100"
-            style={{ animationDelay: `${idx * 200}ms` }}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${db.color} text-lg`}>
-                {db.icon}
-              </div>
-              <div>
-                <p className="font-medium text-dark">{db.name}</p>
-                <p className="text-xs text-text-muted">{db.slug} &bull; {db.size} ГБ</p>
-              </div>
+const GuestMockup: React.FC = () => {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [paused, setPaused] = useState(false);
+
+  const rotate = useCallback(() => {
+    setVisible(false);
+    setTimeout(() => {
+      setActiveIdx((prev) => (prev + 1) % COMPANIES.length);
+      setVisible(true);
+    }, FADE_DURATION);
+  }, []);
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = setInterval(rotate, ROTATION_INTERVAL);
+    return () => clearInterval(timer);
+  }, [paused, rotate]);
+
+  const company = COMPANIES[activeIdx];
+
+  return (
+    <div className="flex flex-1 items-center justify-center">
+      <div
+        className="group relative w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-2xl"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <div
+          className="transition-opacity duration-400 ease-in-out"
+          style={{ opacity: visible ? 1 : 0, transitionDuration: `${FADE_DURATION}ms` }}
+        >
+          {/* Header */}
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-dark">{company.name}</h3>
+              <p className="text-sm text-text-muted">
+                Тариф: {company.tariff} | Активен до {company.activeUntil}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500 group-hover:animate-softPing" />
-              <span className="text-sm text-green-600">Работает</span>
+            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+              Всё работает
+            </span>
+          </div>
+
+          {/* Database cards */}
+          <div className="space-y-3">
+            {company.dbs.map((db, idx) => (
+              <div
+                key={db.slug}
+                className="flex animate-fadeInUp items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 opacity-0 transition-all duration-200 hover:translate-x-1 hover:bg-gray-100"
+                style={{ animationDelay: `${idx * 150}ms` }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${db.color} text-lg`}>
+                    {db.icon}
+                  </div>
+                  <div>
+                    <p className="font-medium text-dark">{db.name}</p>
+                    <p className="text-xs text-text-muted">{db.slug} &bull; {db.size} ГБ</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-green-500 group-hover:animate-softPing" />
+                  <span className="text-sm text-green-600">Работает</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom stats */}
+          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">
+                {company.stats.bases}
+              </p>
+              <p className="text-xs text-gray-400">{company.stats.basesLabel}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">
+                {company.stats.users}
+              </p>
+              <p className="text-xs text-gray-400">{company.stats.usersLabel}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-green-600 transition-transform duration-300 group-hover:scale-110">
+                99.9%
+              </p>
+              <p className="text-xs text-gray-400">Uptime</p>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Bottom stats */}
-      <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
-        <div className="text-center">
-          <p className="text-lg font-bold text-dark transition-transform duration-300 group-hover:scale-110">3</p>
-          <p className="text-[11px] text-text-muted">Базы</p>
-        </div>
-        <div className="text-center">
-          <p className="text-lg font-bold text-dark transition-transform duration-300 group-hover:scale-110">5</p>
-          <p className="text-[11px] text-text-muted">Пользователей</p>
-        </div>
-        <div className="text-center">
-          <p className="text-lg font-bold text-green-600 transition-transform duration-300 group-hover:scale-110">99.9%</p>
-          <p className="text-[11px] text-text-muted">Uptime</p>
+        {/* Rotation dots */}
+        <div className="mt-4 flex items-center justify-center gap-2">
+          {COMPANIES.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => { setActiveIdx(idx); setVisible(true); }}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                idx === activeIdx ? "w-6 bg-primary" : "w-1.5 bg-gray-300 hover:bg-gray-400"
+              }`}
+              aria-label={`Компания ${idx + 1}`}
+            />
+          ))}
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ── Auth: Frozen mockup ─────────────────────────────────────────────── */
 
@@ -205,16 +300,16 @@ const RealDashboard: React.FC<{ user: UserStatus; databases: DbInfo[] }> = ({ us
         {/* Bottom stats */}
         <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
           <div className="text-center">
-            <p className="text-lg font-bold text-dark">{databases.length}</p>
-            <p className="text-[11px] text-text-muted">{databases.length === 1 ? "База" : "Базы"}</p>
+            <p className="text-3xl font-bold text-dark">{databases.length}</p>
+            <p className="text-xs text-gray-400">{databases.length === 1 ? "База" : "Базы"}</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-dark">&mdash;</p>
-            <p className="text-[11px] text-text-muted">Пользователей</p>
+            <p className="text-3xl font-bold text-dark">&mdash;</p>
+            <p className="text-xs text-gray-400">Пользователей</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-green-600">99.9%</p>
-            <p className="text-[11px] text-text-muted">Uptime</p>
+            <p className="text-3xl font-bold text-green-600">99.9%</p>
+            <p className="text-xs text-gray-400">Uptime</p>
           </div>
         </div>
       </div>
