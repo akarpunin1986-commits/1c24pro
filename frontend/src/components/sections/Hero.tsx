@@ -56,10 +56,16 @@ const DB_ICONS: Record<string, { icon: string; color: string }> = {
 
 /* ── Guest: Rotating dashboard mockup ─────────────────────────────────── */
 
+function futureDate(daysFromNow: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 interface MockCompany {
   name: string;
   tariff: string;
-  activeUntil: string;
+  activeDaysFromNow: number;
   dbs: { name: string; slug: string; size: string; color: string; icon: string }[];
   stats: { bases: number; basesLabel: string; users: number; usersLabel: string };
 }
@@ -68,7 +74,7 @@ const COMPANIES: MockCompany[] = [
   {
     name: "ООО «Рассвет»",
     tariff: "Бизнес",
-    activeUntil: "15.03.2026",
+    activeDaysFromNow: 30,
     dbs: [
       { name: "Бухгалтерия 3.0", slug: "rassvet_bp30_1", size: "0.8", color: "bg-green-100", icon: "📗" },
       { name: "ЗУП 3.1", slug: "rassvet_zup31_1", size: "1.2", color: "bg-blue-100", icon: "📘" },
@@ -79,7 +85,7 @@ const COMPANIES: MockCompany[] = [
   {
     name: "ООО «Сортсемовощ»",
     tariff: "Корпорация",
-    activeUntil: "01.06.2026",
+    activeDaysFromNow: 90,
     dbs: [
       { name: "Бухгалтерия 3.0", slug: "sso_bp30_1", size: "1.5", color: "bg-green-100", icon: "📗" },
       { name: "ERP 2.5", slug: "sso_erp25_1", size: "8.4", color: "bg-red-100", icon: "📕" },
@@ -91,7 +97,7 @@ const COMPANIES: MockCompany[] = [
   {
     name: "ИП Карпунин А.А.",
     tariff: "Старт",
-    activeUntil: "20.04.2026",
+    activeDaysFromNow: 60,
     dbs: [
       { name: "Бухгалтерия 3.0", slug: "karpunin_bp30_1", size: "0.3", color: "bg-green-100", icon: "📗" },
     ],
@@ -139,7 +145,7 @@ const GuestMockup: React.FC = () => {
             <div>
               <h3 className="text-lg font-bold text-dark">{company.name}</h3>
               <p className="text-sm text-text-muted">
-                Тариф: {company.tariff} | Активен до {company.activeUntil}
+                Тариф: {company.tariff} | Активен до {futureDate(company.activeDaysFromNow)}
               </p>
             </div>
             <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
