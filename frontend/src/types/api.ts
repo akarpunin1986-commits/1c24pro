@@ -37,6 +37,7 @@ export interface VerifyCodeResponse {
 export interface CompleteRegistrationRequest {
   inn: string;
   referral_code?: string;
+  org_data?: Record<string, string | null | undefined>;
 }
 
 /** Response from POST /auth/complete-registration */

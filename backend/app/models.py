@@ -72,7 +72,7 @@ class User(Base):
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("organizations.id"), index=True
     )
-    phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    phone: Mapped[str] = mapped_column(String(60), unique=True, index=True)
     email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
     phone_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)

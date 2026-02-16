@@ -66,10 +66,14 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  const handleRegister = async (inn: string, referralCode?: string): Promise<void> => {
+  const handleRegister = async (
+    inn: string,
+    referralCode?: string,
+    orgData?: Record<string, string | null | undefined>,
+  ): Promise<void> => {
     setError("");
     try {
-      const result = await completeRegistration(inn, tempToken, referralCode);
+      const result = await completeRegistration(inn, tempToken, referralCode, orgData);
       localStorage.setItem("access_token", result.access_token);
       localStorage.setItem("refresh_token", result.refresh_token);
       navigate("/dashboard");

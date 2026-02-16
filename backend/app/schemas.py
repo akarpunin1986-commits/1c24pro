@@ -46,6 +46,7 @@ class CompleteRegistrationRequest(BaseModel):
 
     inn: str = Field(..., min_length=10, max_length=12, examples=["7707083893"])
     referral_code: str | None = None
+    org_data: dict[str, str | None] | None = None
 
 
 class CompleteRegistrationResponse(BaseModel):

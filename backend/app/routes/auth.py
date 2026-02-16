@@ -199,13 +199,21 @@ async def complete_registration(
     if result.scalar_one_or_none():
         raise ConflictError("Этот номер уже зарегистрирован")
 
-    # Lookup INN via DaData
-    org_data = await dadata.find_by_inn(body.inn)
-    if not org_data or not org_data.get("inn"):
-        raise NotFoundError("ИНН не найден в ЕГРЮЛ/ЕГРИП")
+    # Use cached org_data from frontend if available, otherwise fetch from DaData
+    if body.org_data and body.org_data.get("inn") == body.inn:
+        org_data = body.org_data
+    else:
+        org_data = await dadata.find_by_inn(body.inn)
+        if not org_data or not org_data.get("inn"):
+            raise NotFoundError("ИНН не найден в ЕГРЮЛ/ЕГРИП")
 
-    # Check INN not already registered
-    result = await db.execute(select(Organization).where(Organization.inn == body.inn))
+    # Check INN not already registered (exclude deleted organizations)
+    result = await db.execute(
+        select(Organization).where(
+            Organization.inn == body.inn,
+            Organization.status != "DELETED",
+        )
+    )
     if result.scalar_one_or_none():
         raise ConflictError("Организация с этим ИНН уже зарегистрирована")
 
@@ -398,11 +406,17 @@ async def delete_account(
     current_user.is_deleted = True
     current_user.deleted_at = datetime.now(timezone.utc)
     # Clear personal data (GDPR-like)
-    current_user.phone = f"deleted_{current_user.id}"
+    current_user.phone = f"del_{str(current_user.id)[:8]}"
     current_user.first_name = None
     current_user.last_name = None
     current_user.patronymic = None
     current_user.email = None
+
+    # Mark organization as deleted — free the unique INN for re-registration
+    org = await db.get(Organization, current_user.organization_id)
+    if org:
+        org.status = "DELETED"
+        org.inn = f"del_{org.inn[:8]}"
 
     logger.info("Account deleted (soft): user_id=%s", current_user.id)
     return MessageResponse(message="Account deleted")

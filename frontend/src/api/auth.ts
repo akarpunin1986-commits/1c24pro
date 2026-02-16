@@ -50,8 +50,9 @@ export async function completeRegistration(
   inn: string,
   tempToken: string,
   referralCode?: string,
+  orgData?: Record<string, string | null | undefined>,
 ): Promise<CompleteRegistrationResponse> {
-  const payload: CompleteRegistrationRequest = { inn, referral_code: referralCode };
+  const payload: CompleteRegistrationRequest = { inn, referral_code: referralCode, org_data: orgData };
   const { data } = await apiClient.post<CompleteRegistrationResponse>(
     "/auth/complete-registration",
     payload,

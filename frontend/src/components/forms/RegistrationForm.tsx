@@ -8,14 +8,19 @@ import { apiClient } from "@/api/client";
 
 interface RegistrationFormProps {
   /** Callback when registration is submitted */
-  onSubmit: (inn: string, referralCode?: string) => void;
+  onSubmit: (inn: string, referralCode?: string, orgData?: Record<string, string | null | undefined>) => void;
 }
 
 interface OrgData {
   inn: string;
+  kpp?: string | null;
+  ogrn?: string | null;
   name_short: string;
-  director_name?: string;
-  address?: string;
+  name_full?: string | null;
+  type?: string;
+  director_name?: string | null;
+  address?: string | null;
+  okved?: string | null;
   status: string;
 }
 
@@ -68,7 +73,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit }) 
     e.preventDefault();
     if (!orgData || !accepted) return;
     setLoading(true);
-    onSubmit(inn, referralCode || undefined);
+    onSubmit(inn, referralCode || undefined, orgData);
   };
 
   const canSubmit = orgData !== null && accepted && !loading;
