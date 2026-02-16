@@ -34,7 +34,7 @@ function autoSelectPlan(users: number): (typeof PLANS)[number] {
       return plan;
     }
   }
-  return PLANS[0];
+  return PLANS[0]!;
 }
 
 /** Interactive pricing calculator section */

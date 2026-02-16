@@ -127,7 +127,7 @@ const GuestMockup: React.FC = () => {
     return () => clearInterval(timer);
   }, [paused, rotate]);
 
-  const company = COMPANIES[activeIdx];
+  const company = COMPANIES[activeIdx]!;
 
   return (
     <div className="flex flex-1 items-center justify-center">
@@ -276,8 +276,8 @@ const RealDashboard: React.FC<{ user: UserStatus; databases: DbInfo[] }> = ({ us
         {/* Real database cards */}
         <div className="space-y-3">
           {databases.map((db, idx) => {
-            const st = DB_STATUS[db.status] ?? DB_STATUS.preparing;
-            const ic = DB_ICONS[db.config_code] ?? DB_ICONS.other;
+            const st = (DB_STATUS[db.status] ?? DB_STATUS.preparing)!;
+            const ic = (DB_ICONS[db.config_code] ?? DB_ICONS.other)!;
             return (
               <div
                 key={db.id}

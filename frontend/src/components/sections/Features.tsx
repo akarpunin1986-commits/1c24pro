@@ -47,14 +47,6 @@ const FEATURES: readonly FeatureCard[] = [
   },
 ] as const;
 
-const COLOR_CLASSES: Record<FeatureCard["color"], string> = {
-  orange: "text-primary bg-orange-50",
-  blue: "text-blue bg-blue-50",
-  purple: "text-purple bg-purple-50",
-  pink: "text-pink bg-pink-50",
-  green: "text-green-600 bg-green-50",
-};
-
 /** Feature cards grid section */
 export const Features: React.FC<FeaturesProps> = () => {
   return (

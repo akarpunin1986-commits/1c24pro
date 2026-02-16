@@ -38,7 +38,7 @@ export const BigNumbers: React.FC<BigNumbersProps> = () => {
   const { ref, inView } = useInView({ threshold: 0.3 });
 
   return (
-    <section ref={ref} className="bg-dark py-20">
+    <section ref={ref as React.Ref<HTMLElement>} className="bg-dark py-20">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-10 px-6 md:grid-cols-4">
         {STATS.map((stat) => (
           <StatItem key={stat.label} stat={stat} animate={inView} />

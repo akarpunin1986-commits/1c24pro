@@ -456,7 +456,7 @@ export const DashboardPage: React.FC = () => {
             ) : (
               <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
                 {databases.map((db) => {
-                  const st = STATUS_MAP[db.status] || STATUS_MAP.active;
+                  const st = (STATUS_MAP[db.status] ?? STATUS_MAP.active)!;
                   return (
                     <div key={db.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
                       <div className="mb-3 flex items-start justify-between">
