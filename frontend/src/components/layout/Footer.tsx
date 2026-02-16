@@ -13,7 +13,7 @@ export const Footer: React.FC<FooterProps> = () => {
 
   return (
     <footer className="border-t border-border bg-white py-8">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 sm:flex-row sm:justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-extrabold text-white">
@@ -32,7 +32,7 @@ export const Footer: React.FC<FooterProps> = () => {
           </Link>
           <span className="text-gray-300">|</span>
           <p className="text-sm text-text-muted">
-            &copy; {currentYear} 1C24.PRO. Все права защищены.
+            &copy; {currentYear} 1C24.PRO
           </p>
         </div>
       </div>

@@ -58,13 +58,8 @@ export const Features: React.FC<FeaturesProps> = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
-            <Card key={feature.number} padding="lg" className="relative overflow-hidden transition-shadow hover:shadow-md">
-              {/* Watermark number */}
-              <span className="pointer-events-none absolute right-4 top-2 z-0 select-none text-6xl font-extrabold leading-none text-orange-100">
-                {feature.number}
-              </span>
-              {/* Content */}
-              <div className="relative z-10">
+            <Card key={feature.number} padding="lg" className="transition-shadow hover:shadow-md">
+              <div>
                 <h3 className="text-xl font-bold text-dark">{feature.title}</h3>
                 <p className="mt-2 text-sm text-text-muted">{feature.description}</p>
                 <ul className="mt-4 space-y-2">

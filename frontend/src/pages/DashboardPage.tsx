@@ -83,6 +83,9 @@ export const DashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Sidebar (mobile)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   // Upload state
   const [selectedConfig, setSelectedConfig] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -332,8 +335,20 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* ── Mobile backdrop ────────────────────────── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar ────────────────────────────────── */}
-      <aside className="fixed left-0 top-0 flex h-full w-64 flex-col border-r border-gray-200 bg-white">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-200 md:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 border-b border-gray-100 px-6 py-5 no-underline">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500 text-sm font-extrabold text-white">
@@ -353,7 +368,10 @@ export const DashboardPage: React.FC = () => {
           {tabs.map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setTab(t.id);
+                setSidebarOpen(false);
+              }}
               className={`mb-1 flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm transition-colors ${
                 tab === t.id
                   ? "bg-orange-50 font-semibold text-orange-600"
@@ -389,7 +407,20 @@ export const DashboardPage: React.FC = () => {
       </aside>
 
       {/* ── Main content ──────────────────────────── */}
-      <main className="ml-64 flex-1 p-8">
+      <main className="min-w-0 flex-1 p-4 md:ml-64 md:p-8">
+        {/* Mobile header */}
+        <div className="mb-4 flex items-center gap-3 md:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
+            aria-label="Открыть меню"
+          >
+            <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="text-sm font-semibold text-gray-900">{me.organization.name_short}</span>
+        </div>
         {/* Trial banner — not started */}
         {trialNotStarted && (
           <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4">
