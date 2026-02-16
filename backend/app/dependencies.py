@@ -69,6 +69,9 @@ async def get_current_user(
     if user is None:
         raise UnauthorizedError("User not found")
 
+    if user.is_deleted:
+        raise UnauthorizedError("Аккаунт удалён")
+
     if user.status == "disabled":
         raise ForbiddenError("User account is disabled")
 

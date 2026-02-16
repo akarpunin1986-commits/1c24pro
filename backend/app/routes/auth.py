@@ -16,7 +16,7 @@ from app.auth import (
     create_temp_token,
     decode_token,
 )
-from app.dependencies import get_db
+from app.dependencies import get_current_user, get_db
 from app.exceptions import (
     ConflictError,
     NotFoundError,
@@ -103,8 +103,10 @@ async def send_code(
     if await otp.check_daily_limit(phone, max_daily=10):
         raise RateLimitError("Превышен лимит SMS на сегодня. Попробуйте завтра.")
 
-    # Check if user exists
-    result = await db.execute(select(User).where(User.phone == phone))
+    # Check if user exists (exclude soft-deleted)
+    result = await db.execute(
+        select(User).where(User.phone == phone, User.is_deleted.is_not(True))
+    )
     existing_user = result.scalar_one_or_none()
     is_new_user = existing_user is None
 
@@ -141,8 +143,10 @@ async def verify_code(body: OTPVerifyRequest, db: AsyncSession = Depends(get_db)
     if not is_valid:
         return OTPVerifyResponse(verified=False, needs_registration=False)
 
-    # Check if user exists
-    result = await db.execute(select(User).where(User.phone == phone))
+    # Check if user exists (exclude soft-deleted)
+    result = await db.execute(
+        select(User).where(User.phone == phone, User.is_deleted.is_not(True))
+    )
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
@@ -188,8 +192,10 @@ async def complete_registration(
     if not phone:
         raise UnauthorizedError("Invalid temp token payload")
 
-    # Check phone not already registered
-    result = await db.execute(select(User).where(User.phone == phone))
+    # Check phone not already registered (exclude soft-deleted)
+    result = await db.execute(
+        select(User).where(User.phone == phone, User.is_deleted.is_not(True))
+    )
     if result.scalar_one_or_none():
         raise ConflictError("Этот номер уже зарегистрирован")
 
@@ -291,7 +297,7 @@ async def get_auth_me(
 
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-    if not user:
+    if not user or user.is_deleted:
         raise UnauthorizedError("User not found")
 
     # Get organization
@@ -369,7 +375,7 @@ async def refresh(body: RefreshTokenRequest, db: AsyncSession = Depends(get_db))
 
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-    if not user:
+    if not user or user.is_deleted:
         raise UnauthorizedError("User not found")
 
     access_token = create_access_token(user.id, user.phone, user.role)
@@ -381,6 +387,25 @@ async def refresh(body: RefreshTokenRequest, db: AsyncSession = Depends(get_db))
 async def logout() -> MessageResponse:
     """Invalidate the current session (client-side token removal)."""
     return MessageResponse(message="Successfully logged out")
+
+
+@router.delete("/me", response_model=MessageResponse)
+async def delete_account(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> MessageResponse:
+    """Soft-delete the current user account and clear personal data."""
+    current_user.is_deleted = True
+    current_user.deleted_at = datetime.now(timezone.utc)
+    # Clear personal data (GDPR-like)
+    current_user.phone = f"deleted_{current_user.id}"
+    current_user.first_name = None
+    current_user.last_name = None
+    current_user.patronymic = None
+    current_user.email = None
+
+    logger.info("Account deleted (soft): user_id=%s", current_user.id)
+    return MessageResponse(message="Account deleted")
 
 
 @router.post("/accept-invite", response_model=MessageResponse)

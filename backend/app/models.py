@@ -110,6 +110,12 @@ class User(Base):
     last_login_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean, nullable=True, server_default="false"
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     organization: Mapped["Organization"] = relationship(back_populates="users")

@@ -53,8 +53,10 @@ async def invite(
     """
     now = datetime.now(timezone.utc)
 
-    # Check if phone is already registered
-    result = await db.execute(select(User).where(User.phone == body.phone))
+    # Check if phone is already registered (exclude soft-deleted)
+    result = await db.execute(
+        select(User).where(User.phone == body.phone, User.is_deleted.is_not(True))
+    )
     existing = result.scalar_one_or_none()
     if existing:
         from app.exceptions import ConflictError

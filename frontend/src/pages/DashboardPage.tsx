@@ -97,6 +97,11 @@ export const DashboardPage: React.FC = () => {
   // Referral copy
   const [copied, setCopied] = useState(false);
 
+  // Account deletion
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Employees / Invite
   interface MemberInfo {
     id: string;
@@ -260,6 +265,22 @@ export const DashboardPage: React.FC = () => {
       setProfileMsg("Ошибка сохранения");
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  /* ── Delete account ───────────────────────────── */
+  const handleDeleteAccount = async (): Promise<void> => {
+    if (confirmText !== "УДАЛИТЬ") return;
+    setIsDeleting(true);
+    try {
+      await apiClient.delete("/auth/me");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      window.location.href = "/";
+    } catch {
+      alert("Ошибка при удалении аккаунта. Попробуйте позже.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -856,9 +877,67 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Delete account */}
+            <div className="mt-12 border-t border-gray-200 pt-8">
+              <h3 className="text-lg font-medium text-red-600">Удаление аккаунта</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                После удаления аккаунта все ваши данные будут безвозвратно удалены.
+                Базы данных будут недоступны.
+              </p>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="mt-4 rounded-lg border border-red-300 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
+              >
+                Удалить аккаунт
+              </button>
+            </div>
           </section>
         )}
       </main>
+
+      {/* Delete account confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900">Удалить аккаунт?</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Это действие необратимо. Все ваши базы данных 1С будут удалены,
+              доступ к сервису будет прекращён.
+            </p>
+
+            <p className="mt-4 text-sm text-gray-700">
+              Введите <strong>УДАЛИТЬ</strong> для подтверждения:
+            </p>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+              placeholder="УДАЛИТЬ"
+            />
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setConfirmText("");
+                }}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={() => void handleDeleteAccount()}
+                disabled={confirmText !== "УДАЛИТЬ" || isDeleting}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeleting ? "Удаление..." : "Удалить навсегда"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
