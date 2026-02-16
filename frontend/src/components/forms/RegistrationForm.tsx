@@ -73,7 +73,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSubmit }) 
     e.preventDefault();
     if (!orgData || !accepted) return;
     setLoading(true);
-    onSubmit(inn, referralCode || undefined, orgData);
+    onSubmit(inn, referralCode || undefined, { ...orgData });
   };
 
   const canSubmit = orgData !== null && accepted && !loading;
