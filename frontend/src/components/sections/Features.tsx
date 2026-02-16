@@ -67,12 +67,7 @@ export const Features: React.FC<FeaturesProps> = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <Card key={feature.number} padding="lg" className="transition-shadow hover:shadow-md">
-              <span
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${COLOR_CLASSES[feature.color]}`}
-              >
-                {feature.number}
-              </span>
-              <h3 className="mt-4 text-xl font-bold text-dark">{feature.title}</h3>
+              <h3 className="text-xl font-bold text-dark">{feature.title}</h3>
               <p className="mt-2 text-sm text-text-muted">{feature.description}</p>
               <ul className="mt-4 space-y-2">
                 {feature.items.map((item) => (

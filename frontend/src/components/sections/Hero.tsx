@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { Globe, Monitor, Laptop, Server, UserX, BrainCog } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { UserStatus } from "@/hooks/useAuth";
 
@@ -174,19 +175,19 @@ const GuestMockup: React.FC = () => {
           {/* Bottom stats */}
           <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
             <div className="text-center">
-              <p className="text-3xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">
+              <p className="text-4xl font-extrabold text-dark transition-transform duration-300 group-hover:scale-110">
                 {company.stats.bases}
               </p>
               <p className="text-xs text-gray-400">{company.stats.basesLabel}</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">
+              <p className="text-4xl font-extrabold text-dark transition-transform duration-300 group-hover:scale-110">
                 {company.stats.users}
               </p>
               <p className="text-xs text-gray-400">{company.stats.usersLabel}</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-green-600 transition-transform duration-300 group-hover:scale-110">
+              <p className="text-4xl font-extrabold text-green-600 transition-transform duration-300 group-hover:scale-110">
                 99.9%
               </p>
               <p className="text-xs text-gray-400">Uptime</p>
@@ -300,15 +301,15 @@ const RealDashboard: React.FC<{ user: UserStatus; databases: DbInfo[] }> = ({ us
         {/* Bottom stats */}
         <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
           <div className="text-center">
-            <p className="text-3xl font-bold text-dark">{databases.length}</p>
+            <p className="text-4xl font-extrabold text-dark">{databases.length}</p>
             <p className="text-xs text-gray-400">{databases.length === 1 ? "База" : "Базы"}</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl font-bold text-dark">&mdash;</p>
+            <p className="text-4xl font-extrabold text-dark">&mdash;</p>
             <p className="text-xs text-gray-400">Пользователей</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl font-bold text-green-600">99.9%</p>
+            <p className="text-4xl font-extrabold text-green-600">99.9%</p>
             <p className="text-xs text-gray-400">Uptime</p>
           </div>
         </div>
@@ -450,15 +451,33 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
               <span className="text-primary">Просто работает.</span>
             </h1>
 
-            <div className="max-w-lg space-y-0">
-              <p className="text-lg text-gray-700">
-                Работайте в 1С из любого браузера, тонкого клиента
-                или удалённого рабочего стола Windows.
-              </p>
-              <p className="mt-3 text-base text-gray-500">
-                Без серверов &middot; Без админов &middot; Без головной боли
-              </p>
-              <p className="mt-2 text-lg font-semibold text-gray-800">
+            <div className="max-w-lg">
+              {/* What you get */}
+              <div className="flex flex-wrap gap-4 md:gap-6">
+                <span className="flex items-center gap-1.5 text-sm text-gray-700 md:text-base">
+                  <Globe className="h-[18px] w-[18px] text-green-500" /> Любой браузер
+                </span>
+                <span className="flex items-center gap-1.5 text-sm text-gray-700 md:text-base">
+                  <Monitor className="h-[18px] w-[18px] text-green-500" /> Тонкий клиент
+                </span>
+                <span className="flex items-center gap-1.5 text-sm text-gray-700 md:text-base">
+                  <Laptop className="h-[18px] w-[18px] text-green-500" /> Удалённый рабочий стол
+                </span>
+              </div>
+              {/* What you lose */}
+              <div className="mt-2 flex flex-wrap gap-4 md:gap-6">
+                <span className="flex items-center gap-1.5 text-sm text-gray-400 line-through md:text-base">
+                  <Server className="h-[18px] w-[18px] text-red-400" /> Серверы
+                </span>
+                <span className="flex items-center gap-1.5 text-sm text-gray-400 line-through md:text-base">
+                  <UserX className="h-[18px] w-[18px] text-red-400" /> Админы
+                </span>
+                <span className="flex items-center gap-1.5 text-sm text-gray-400 line-through md:text-base">
+                  <BrainCog className="h-[18px] w-[18px] text-red-400" /> Головная боль
+                </span>
+              </div>
+              {/* Price */}
+              <p className="mt-3 text-lg font-semibold text-gray-800">
                 От 690 ₽/мес за пользователя
               </p>
             </div>
