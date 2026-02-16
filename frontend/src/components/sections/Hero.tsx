@@ -102,16 +102,16 @@ const GuestMockup: React.FC = () => (
       {/* Bottom stats */}
       <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
         <div className="text-center">
-          <p className="text-2xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">3</p>
-          <p className="text-xs text-text-muted">Базы</p>
+          <p className="text-lg font-bold text-dark transition-transform duration-300 group-hover:scale-110">3</p>
+          <p className="text-[11px] text-text-muted">Базы</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-dark transition-transform duration-300 group-hover:scale-110">5</p>
-          <p className="text-xs text-text-muted">Пользователей</p>
+          <p className="text-lg font-bold text-dark transition-transform duration-300 group-hover:scale-110">5</p>
+          <p className="text-[11px] text-text-muted">Пользователей</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-green-600 transition-transform duration-300 group-hover:scale-110">99.9%</p>
-          <p className="text-xs text-text-muted">Uptime</p>
+          <p className="text-lg font-bold text-green-600 transition-transform duration-300 group-hover:scale-110">99.9%</p>
+          <p className="text-[11px] text-text-muted">Uptime</p>
         </div>
       </div>
     </div>
@@ -205,16 +205,16 @@ const RealDashboard: React.FC<{ user: UserStatus; databases: DbInfo[] }> = ({ us
         {/* Bottom stats */}
         <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-dark">{databases.length}</p>
-            <p className="text-xs text-text-muted">{databases.length === 1 ? "База" : "Базы"}</p>
+            <p className="text-lg font-bold text-dark">{databases.length}</p>
+            <p className="text-[11px] text-text-muted">{databases.length === 1 ? "База" : "Базы"}</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-dark">&mdash;</p>
-            <p className="text-xs text-text-muted">Пользователей</p>
+            <p className="text-lg font-bold text-dark">&mdash;</p>
+            <p className="text-[11px] text-text-muted">Пользователей</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-green-600">99.9%</p>
-            <p className="text-xs text-text-muted">Uptime</p>
+            <p className="text-lg font-bold text-green-600">99.9%</p>
+            <p className="text-[11px] text-text-muted">Uptime</p>
           </div>
         </div>
       </div>
@@ -288,7 +288,7 @@ const TrustBadges: React.FC = () => (
       <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
       </svg>
-      Любая оплата
+      Любая форма оплаты
     </span>
   </div>
 );
@@ -355,11 +355,18 @@ export const Hero: React.FC<HeroProps> = ({ user = null, databases = [], loading
               <span className="text-primary">Просто работает.</span>
             </h1>
 
-            <p className="max-w-lg text-lg text-text-muted">
-              Загрузите свою базу 1С и работайте из любого браузера, тонкого клиента или удалённого
-              рабочего стола Windows. Без серверов, без админов, без головной боли. От 690 ₽/мес за
-              пользователя.
-            </p>
+            <div className="max-w-lg space-y-0">
+              <p className="text-lg text-gray-700">
+                Работайте в 1С из любого браузера, тонкого клиента
+                или удалённого рабочего стола Windows.
+              </p>
+              <p className="mt-3 text-base text-gray-500">
+                Без серверов &middot; Без админов &middot; Без головной боли
+              </p>
+              <p className="mt-2 text-lg font-semibold text-gray-800">
+                От 690 ₽/мес за пользователя
+              </p>
+            </div>
 
             <div className="flex flex-wrap gap-3">
               <Link to="/auth">

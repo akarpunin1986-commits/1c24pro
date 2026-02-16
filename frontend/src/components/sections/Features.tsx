@@ -38,6 +38,13 @@ const FEATURES: readonly FeatureCard[] = [
     color: "pink",
     items: ["Без менеджеров", "Автозаполнение по ИНН", "67 дней на решение"],
   },
+  {
+    number: "05",
+    title: "Живая техподдержка",
+    description: "Техническая поддержка от живых специалистов на тарифах Бизнес и Корпорация. Не бот, а реальная помощь.",
+    color: "green",
+    items: ["Реальные специалисты", "Приоритет на тарифах Бизнес+", "Помощь с настройкой"],
+  },
 ] as const;
 
 const COLOR_CLASSES: Record<FeatureCard["color"], string> = {
@@ -45,6 +52,7 @@ const COLOR_CLASSES: Record<FeatureCard["color"], string> = {
   blue: "text-blue bg-blue-50",
   purple: "text-purple bg-purple-50",
   pink: "text-pink bg-pink-50",
+  green: "text-green-600 bg-green-50",
 };
 
 /** Feature cards grid section */
@@ -56,7 +64,7 @@ export const Features: React.FC<FeaturesProps> = () => {
           Почему 1C24.PRO
         </h2>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <Card key={feature.number} padding="lg" className="transition-shadow hover:shadow-md">
               <span

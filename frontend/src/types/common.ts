@@ -71,7 +71,7 @@ export interface FeatureCard {
   number: string;
   title: string;
   description: string;
-  color: "orange" | "blue" | "purple" | "pink";
+  color: "orange" | "blue" | "purple" | "pink" | "green";
   items: string[];
 }
 
