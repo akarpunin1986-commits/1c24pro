@@ -8,8 +8,8 @@ import { useState, useEffect, useRef } from "react";
 interface OTPInputProps {
   /** Phone number the code was sent to */
   phone: string;
-  /** Callback when code is verified */
-  onVerify: (code: string) => void;
+  /** Callback when code is verified — throw or resolve */
+  onVerify: (code: string) => void | Promise<void>;
   /** Callback when user requests code resend */
   onResend: () => void;
 }
@@ -46,7 +46,11 @@ export const OTPInput: React.FC<OTPInputProps> = ({ phone, onVerify, onResend })
     setCode(value);
     if (value.length === 6) {
       setLoading(true);
-      onVerify(value);
+      Promise.resolve(onVerify(value)).catch(() => {}).finally(() => {
+        setLoading(false);
+        setCode("");
+        setTimeout(() => inputRef.current?.focus(), 50);
+      });
     }
   };
 

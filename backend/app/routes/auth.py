@@ -405,18 +405,21 @@ async def delete_account(
     """Soft-delete the current user account and clear personal data."""
     current_user.is_deleted = True
     current_user.deleted_at = datetime.now(timezone.utc)
-    # Clear personal data (GDPR-like)
-    current_user.phone = f"del_{str(current_user.id)[:8]}"
+    # Clear personal data and free unique constraints (GDPR-like)
+    uid_short = str(current_user.id)[:8]
+    current_user.phone = f"del_{uid_short}"
+    current_user.email = None
     current_user.first_name = None
     current_user.last_name = None
     current_user.patronymic = None
-    current_user.email = None
+    current_user.referral_code = f"del_{uid_short}"
 
-    # Mark organization as deleted — free the unique INN for re-registration
+    # Mark organization as deleted — free unique INN and slug for re-registration
     org = await db.get(Organization, current_user.organization_id)
     if org:
         org.status = "DELETED"
-        org.inn = f"del_{org.inn[:8]}"
+        org.inn = f"del_{str(org.id)[:8]}"
+        org.slug = f"del_{str(org.id)[:8]}"
 
     logger.info("Account deleted (soft): user_id=%s", current_user.id)
     return MessageResponse(message="Account deleted")
